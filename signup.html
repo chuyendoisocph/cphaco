@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Cphaco.app</title>
+    <meta name="description" content="Đăng ký tài khoản Cphaco.app để truy cập các ứng dụng quản lý nghĩa trang">
+    <link rel="stylesheet" href="signin.css">
+    <style>
+        /* Additional styles for signup page */
+        .signup-card .form-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .password-requirements {
+            background: #f8f9ff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .password-requirements ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .password-requirements li {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .password-requirements li.met {
+            color: #10b981;
+        }
+        
+        .password-requirements li.met::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .password-requirements li:not(.met)::before {
+            content: '○';
+            color: var(--text-light);
+        }
+        
+        .terms-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .terms-label a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .terms-label a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Gradient Orbs -->
+    <div class="background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="signin-container">
+        <!-- Left Side - Branding -->
+        <div class="signin-brand">
+            <a href="index.html" class="brand-logo">
+                <img src="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" alt="Cphaco Logo">
+                <span class="brand-name">Cphaco.app</span>
+            </a>
+            
+            <div class="brand-content">
+                <h1 class="brand-title">
+                    Bắt đầu ngay hôm nay! 🚀
+                </h1>
+                <p class="brand-description">
+                    Tạo tài khoản miễn phí để truy cập toàn bộ 8 ứng dụng quản lý nghĩa trang hiện đại.
+                </p>
+                
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">✨</div>
+                        <div class="feature-text">
+                            <strong>Hoàn toàn miễn phí</strong>
+                            <p>Không mất phí, không giới hạn tính năng</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⏱️</div>
+                        <div class="feature-text">
+                            <strong>Đăng ký trong 30 giây</strong>
+                            <p>Chỉ cần vài thông tin cơ bản</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-text">
+                            <strong>Truy cập ngay lập tức</strong>
+                            <p>Sử dụng tất cả ứng dụng sau khi đăng ký</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Sign Up Form -->
+        <div class="signin-form-container">
+            <div class="signin-card signup-card">
+                <!-- Back Button -->
+                <a href="index.html" class="back-button">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Quay lại
+                </a>
+
+                <!-- Form Header -->
+                <div class="form-header">
+                    <h2 class="form-title">Tạo tài khoản</h2>
+                    <p class="form-description">Điền thông tin để bắt đầu</p>
+                </div>
+
+                <!-- Social Login Buttons -->
+                <div class="social-login">
+                    <button class="social-button google-button">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <path d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z" fill="#4285F4"/>
+                            <path d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z" fill="#34A853"/>
+                            <path d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z" fill="#FBBC05"/>
+                            <path d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z" fill="#EA4335"/>
+                        </svg>
+                        Đăng ký với Google
+                    </button>
+                    
+                    <button class="social-button microsoft-button">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <path fill="#f25022" d="M0 0h9.5v9.5H0z"/>
+                            <path fill="#00a4ef" d="M10.5 0H20v9.5h-9.5z"/>
+                            <path fill="#7fba00" d="M0 10.5h9.5V20H0z"/>
+                            <path fill="#ffb900" d="M10.5 10.5H20V20h-9.5z"/>
+                        </svg>
+                        Đăng ký với Microsoft
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>hoặc</span>
+                </div>
+
+                <!-- Sign Up Form -->
+                <form class="signin-form" id="signupForm">
+                    <div class="form-group">
+                        <label for="fullname" class="form-label">Họ và tên</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 10C12.7614 10 15 7.76142 15 5C15 2.23858 12.7614 0 10 0C7.23858 0 5 2.23858 5 5C5 7.76142 7.23858 10 10 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M17.5 20C17.5 16.5 14.1421 13.75 10 13.75C5.85786 13.75 2.5 16.5 2.5 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input 
+                                type="text" 
+                                id="fullname" 
+                                class="form-input" 
+                                placeholder="Nguyễn Văn A"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3.33333 3.33334H16.6667C17.5833 3.33334 18.3333 4.08334 18.3333 5.00001V15C18.3333 15.9167 17.5833 16.6667 16.6667 16.6667H3.33333C2.41666 16.6667 1.66666 15.9167 1.66666 15V5.00001C1.66666 4.08334 2.41666 3.33334 3.33333 3.33334Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18.3333 5L10 10.8333L1.66666 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                class="form-input" 
+                                placeholder="your.email@example.com"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Mật khẩu</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M15.8333 9.16667H4.16667C3.24619 9.16667 2.5 9.91286 2.5 10.8333V16.6667C2.5 17.5871 3.24619 18.3333 4.16667 18.3333H15.8333C16.7538 18.3333 17.5 17.5871 17.5 16.6667V10.8333C17.5 9.91286 16.7538 9.16667 15.8333 9.16667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.83334 9.16667V5.83333C5.83334 4.72826 6.27232 3.66846 7.05372 2.88706C7.83512 2.10565 8.89493 1.66667 10 1.66667C11.1051 1.66667 12.1649 2.10565 12.9463 2.88706C13.7277 3.66846 14.1667 4.72826 14.1667 5.83333V9.16667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                class="form-input" 
+                                placeholder="••••••••"
+                                required
+                            >
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M1.66666 10C1.66666 10 4.16666 4.16667 10 4.16667C15.8333 4.16667 18.3333 10 18.3333 10C18.3333 10 15.8333 15.8333 10 15.8333C4.16666 15.8333 1.66666 10 1.66666 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="password-requirements" id="passwordRequirements">
+                            <ul>
+                                <li data-requirement="length">Ít nhất 8 ký tự</li>
+                                <li data-requirement="uppercase">Có chữ hoa</li>
+                                <li data-requirement="lowercase">Có chữ thường</li>
+                                <li data-requirement="number">Có số</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="terms-label">
+                            <input type="checkbox" id="terms" required>
+                            <span class="checkbox-custom"></span>
+                            <span>
+                                Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        <span>Tạo tài khoản</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4.16666 10H15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 4.16667L15.8333 10L10 15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Sign In Link -->
+                <div class="signup-prompt">
+                    <p>Đã có tài khoản? <a href="signin.html" class="signup-link">Đăng nhập ngay</a></p>
+                </div>
+
+                <!-- Footer Links -->
+                <div class="form-footer">
+                    <a href="#">Điều khoản sử dụng</a>
+                    <span>•</span>
+                    <a href="#">Chính sách bảo mật</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="signup.js"></script>
+</body>
+</html>
