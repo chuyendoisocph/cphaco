@@ -116,8 +116,8 @@ signinForm.addEventListener('submit', async function(e) {
         
         // Redirect after 1.5 seconds
         setTimeout(() => {
-            // Replace with your actual redirect
-            window.location.href = 'index.html';
+            // 🎯 THAY ĐỔI: Redirect đến dashboard thay vì index.html
+            window.location.href = 'dashboard.html';
         }, 1500);
         
     } catch (error) {
@@ -136,12 +136,25 @@ function simulateLogin(email, password, remember) {
             // Demo: accept any email/password for testing
             // In production, replace with actual authentication
             if (email && password) {
+                // 🎯 THAY ĐỔI: Lưu thông tin user để dashboard sử dụng
+                // Extract first name from email (before @ and before .)
+                const emailPart = email.split('@')[0];
+                const firstName = emailPart.split('.')[0];
+                const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+                
+                // Save user info to localStorage
+                localStorage.setItem('userName', capitalizedName);
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loginTime', new Date().toISOString());
+                
                 // Save to localStorage if remember is checked
                 if (remember) {
                     localStorage.setItem('rememberedEmail', email);
                 } else {
                     localStorage.removeItem('rememberedEmail');
                 }
+                
                 resolve({ success: true });
             } else {
                 reject({ message: 'Email hoặc mật khẩu không đúng' });
@@ -303,4 +316,5 @@ document.head.appendChild(style);
 
 // Console message
 console.log('🔐 Cphaco.app Sign In loaded successfully!');
-console.log('📧 Demo mode: Any email/password will work for testing');
+console.log('🔧 Demo mode: Any email/password will work for testing');
+console.log('🎯 Will redirect to dashboard.html after successful login');
