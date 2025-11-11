@@ -14,7 +14,7 @@
 
 // ===== CONFIGURATION =====
 const SPREADSHEET_ID = '190KTfaRU56bYOU9E_EhM7GTyBXommqbJ0SFkF1pqXoY'; // Your Google Sheet ID
-const JWT_SECRET = 'YOUR_SECRET_KEY_CHANGE_THIS_123456'; // Đổi thành secret key của bạn
+const JWT_SECRET = '1xqBJtlbUAz6vbbHy00Myfhzw2L45iL_rTpP9mtuk5FxU79cJUkWntYAB'; // Đổi thành secret key của bạn
 const TOKEN_EXPIRY_HOURS = 8; // Token hết hạn sau 8 giờ
 
 // ===== MAIN HANDLER =====
@@ -282,27 +282,98 @@ function handleSendOTP(data) {
   
   // Send email with OTP
   try {
-    MailApp.sendEmail({
-      to: email,
-      subject: 'Mã OTP đăng nhập Cphaco.app',
-      htmlBody: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #0066FF;">Mã OTP của bạn</h2>
-          <p>Xin chào,</p>
-          <p>Mã OTP để đăng nhập vào Cphaco.app của bạn là:</p>
-          <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 20px 0;">
-            ${otp}
-          </div>
-          <p>Mã này sẽ hết hạn sau <strong>10 phút</strong>.</p>
-          <p>Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email này.</p>
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #666; font-size: 12px;">
-            Đây là email tự động, vui lòng không trả lời email này.<br>
-            © 2024 Cphaco.app. All rights reserved.
-          </p>
-        </div>
-      `
-    });
+MailApp.sendEmail({
+  to: email,
+  subject: 'Mã OTP đăng nhập Cphaco.app',
+  name: 'Cphaco.app',
+  replyTo: 'noreply@cphaco.app',
+  htmlBody: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 0;">
+        <tr>
+          <td align="center">
+            <!-- Main Container -->
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              
+              <!-- Header with Logo -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #0066FF, #00C9FF); padding: 40px 30px; text-align: center;">
+                  <img src="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" alt="Cphaco Logo" style="height: 60px; margin-bottom: 10px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Xác thực tài khoản</h1>
+                </td>
+              </tr>
+              
+              <!-- Body Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                    Xin chào,
+                  </p>
+                  <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 30px;">
+                    Mã OTP để xác thực tài khoản Cphaco.app của bạn là:
+                  </p>
+                  
+                  <!-- OTP Code Box -->
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td align="center" style="padding: 30px 0;">
+                        <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 20px 0;">
+                        ${otp}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <!-- Info Box -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #fff9e6; border-left: 4px solid #ffc107; border-radius: 8px; margin: 30px 0;">
+                    <tr>
+                      <td style="padding: 20px;">
+                        <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
+                          ⏰ <strong>Lưu ý:</strong> Mã này chỉ có hiệu lực trong <strong>10 phút</strong>.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <p style="color: #666666; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
+                    Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi nếu bạn có bất kỳ thắc mắc nào.
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="background: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                  <p style="color: #999999; font-size: 12px; margin: 0 0 10px;">
+                    Đây là email tự động, vui lòng không trả lời email này.
+                  </p>
+                  <p style="color: #999999; font-size: 12px; margin: 0;">
+                    © 2025 <strong>Cphaco.app</strong> - All rights reserved.
+                  </p>
+                  <div style="margin-top: 20px;">
+                    <a href="https://cphaco.app" style="color: #0066FF; text-decoration: none; margin: 0 10px; font-size: 12px;">Website</a>
+                    <span style="color: #cccccc;">|</span>
+                    <a href="mailto:support@cphaco.app" style="color: #0066FF; text-decoration: none; margin: 0 10px; font-size: 12px;">Hỗ trợ</a>
+                    <span style="color: #cccccc;">|</span>
+                    <a href="https://cphaco.app/privacy" style="color: #0066FF; text-decoration: none; margin: 0 10px; font-size: 12px;">Chính sách</a>
+                  </div>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `
+});
     
     return jsonResponse({
       ok: true,
@@ -324,7 +395,7 @@ function handleSendOTP(data) {
 function handleVerifyOTP(data) {
   const email = data.email;
   const code = data.code;
-  const action = data.action || 'signup'; // 'signup' or 'reset-password'
+  const purpose = data.purpose || 'signup'; // 'signup' or 'reset-password'
   
   if (!email || !code) {
     return jsonResponse({
@@ -372,14 +443,26 @@ function handleVerifyOTP(data) {
   // Delete used OTP
   props.deleteProperty(otpKey);
   
+  Logger.log('OTP verified successfully for: %s', email);
+  Logger.log('Purpose: %s', purpose);
+  
   // Return success with token for password reset
-  if (action === 'reset-password') {
+  if (purpose === 'reset-password') {
     // Create temporary token for password reset
     const resetToken = Utilities.getUuid();
-    props.setProperty('RESET_TOKEN_' + email, JSON.stringify({
+    const tokenKey = 'RESET_TOKEN_' + email;
+    
+    Logger.log('Creating reset token: %s', resetToken);
+    Logger.log('Token key: %s', tokenKey);
+    
+    props.setProperty(tokenKey, JSON.stringify({
       token: resetToken,
       timestamp: Date.now()
     }));
+    
+    // Verify token was saved
+    const saved = props.getProperty(tokenKey);
+    Logger.log('Token saved successfully: %s', saved ? 'YES' : 'NO');
     
     return jsonResponse({
       ok: true,
@@ -399,11 +482,19 @@ function handleVerifyOTP(data) {
  * Handle reset password request
  */
 function handleResetPassword(data) {
+  Logger.log('=== RESET PASSWORD REQUEST ===');
+  Logger.log('Full data: %s', JSON.stringify(data));
+  
   const email = data.email;
   const resetToken = data.resetToken;
   const newPassword = data.newPassword;
   
+  Logger.log('Email: %s', email);
+  Logger.log('Reset Token: %s', resetToken);
+  Logger.log('New Password length: %s', newPassword ? newPassword.length : 'undefined');
+  
   if (!email || !resetToken || !newPassword) {
+    Logger.log('Missing required fields!');
     return jsonResponse({
       ok: false,
       error: 'Thiếu thông tin bắt buộc'
@@ -413,9 +504,13 @@ function handleResetPassword(data) {
   // Verify reset token
   const props = PropertiesService.getScriptProperties();
   const tokenKey = 'RESET_TOKEN_' + email;
+  Logger.log('Looking for token with key: %s', tokenKey);
+  
   const tokenDataStr = props.getProperty(tokenKey);
+  Logger.log('Token data from storage: %s', tokenDataStr);
   
   if (!tokenDataStr) {
+    Logger.log('Token not found in storage!');
     return jsonResponse({
       ok: false,
       error: 'Token không hợp lệ hoặc đã hết hạn'
@@ -423,13 +518,17 @@ function handleResetPassword(data) {
   }
   
   const tokenData = JSON.parse(tokenDataStr);
+  Logger.log('Parsed token data: %s', JSON.stringify(tokenData));
   
   // Check token expiry (30 minutes)
   const now = Date.now();
   const elapsed = now - tokenData.timestamp;
   const THIRTY_MINUTES = 30 * 60 * 1000;
   
+  Logger.log('Token age: %s ms (limit: %s ms)', elapsed, THIRTY_MINUTES);
+  
   if (elapsed > THIRTY_MINUTES) {
+    Logger.log('Token expired!');
     props.deleteProperty(tokenKey);
     return jsonResponse({
       ok: false,
@@ -437,12 +536,19 @@ function handleResetPassword(data) {
     });
   }
   
+  Logger.log('Comparing tokens:');
+  Logger.log('  Received: %s', resetToken);
+  Logger.log('  Stored:   %s', tokenData.token);
+  
   if (resetToken !== tokenData.token) {
+    Logger.log('Token mismatch!');
     return jsonResponse({
       ok: false,
       error: 'Token không hợp lệ'
     });
   }
+  
+  Logger.log('Token verified successfully!');
   
   // Update password in sheet
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);

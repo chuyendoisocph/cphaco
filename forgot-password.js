@@ -1,10 +1,10 @@
 // ========================================
-// FORGOT-PASSWORD.JS - CPHACO.APP
+// FORGOT-PASSWORD.JS - CPHACO.APP (FIXED)
 // Reset password via OTP
 // ========================================
 
 // ===== CONFIGURATION =====
-const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbwwOc00czKNL_R57w89sVCfnrBoRqEWBHmEBXsCeKni0aWhnHoqW3cIyzt4wwTsl6CSQQ/exec';
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec';
 
 // ===== STATE =====
 let currentStep = 1;
@@ -91,10 +91,18 @@ function goToStep(step) {
 
 // ===== API CALLS =====
 
+/**
+ * Send OTP to email
+ */
 async function sendOTP(email) {
     try {
+        console.log('Sending OTP to:', email);
+        
         const response = await fetch(AUTH_BASE, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({
                 action: 'send-otp',
                 email: email
@@ -102,6 +110,7 @@ async function sendOTP(email) {
         });
         
         const data = await response.json();
+        console.log('Send OTP response:', data);
         
         if (!data.ok) {
             throw new Error(data.error || 'Không thể gửi OTP');
@@ -114,19 +123,28 @@ async function sendOTP(email) {
     }
 }
 
+/**
+ * Verify OTP code
+ */
 async function verifyOTP(email, code) {
     try {
+        console.log('Verifying OTP for:', email, 'Code:', code);
+        
         const response = await fetch(AUTH_BASE, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({
                 action: 'verify-otp',
                 email: email,
                 code: code,
-                action: 'reset-password'
+                purpose: 'reset-password'
             })
         });
         
         const data = await response.json();
+        console.log('Verify OTP response:', data);
         
         if (!data.ok) {
             throw new Error(data.error || 'OTP không chính xác');
@@ -139,10 +157,30 @@ async function verifyOTP(email, code) {
     }
 }
 
+/**
+ * Reset password with token
+ */
 async function resetPassword(email, token, newPassword) {
     try {
+        console.log('=== RESET PASSWORD DEBUG ===');
+        console.log('Email:', email);
+        console.log('Token:', token);
+        console.log('Token length:', token ? token.length : 'undefined');
+        console.log('Email length:', email ? email.length : 'undefined');
+        
+        if (!email) {
+            throw new Error('Email is undefined! Please restart the process.');
+        }
+        
+        if (!token) {
+            throw new Error('Reset token is undefined! Please restart the process.');
+        }
+        
         const response = await fetch(AUTH_BASE, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({
                 action: 'reset-password',
                 email: email,
@@ -152,6 +190,7 @@ async function resetPassword(email, token, newPassword) {
         });
         
         const data = await response.json();
+        console.log('Reset password response:', data);
         
         if (!data.ok) {
             throw new Error(data.error || 'Không thể đặt lại mật khẩu');
@@ -205,6 +244,8 @@ emailForm.addEventListener('submit', async function(e) {
         startResendCooldown();
         
     } catch (error) {
+        console.error('Error in step 1:', error);
+        
         submitBtn.classList.remove('loading');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -259,9 +300,18 @@ otpForm.addEventListener('submit', async function(e) {
     // Get OTP code
     const code = Array.from(otpInputs).map(input => input.value).join('');
     
+    console.log('OTP Code collected:', code);
+    console.log('User Email:', userEmail);
+    
     if (code.length !== 6) {
         alert('Vui lòng nhập đầy đủ 6 chữ số');
         otpInputs[0].focus();
+        return;
+    }
+    
+    if (!userEmail) {
+        alert('Lỗi: Email chưa được thiết lập. Vui lòng quay lại bước 1.');
+        goToStep(1);
         return;
     }
     
@@ -275,11 +325,15 @@ otpForm.addEventListener('submit', async function(e) {
     try {
         resetToken = await verifyOTP(userEmail, code);
         
+        console.log('Reset token received:', resetToken);
+        
         // Success - go to step 3
         goToStep(3);
         newPasswordInput.focus();
         
     } catch (error) {
+        console.error('Error in step 2:', error);
+        
         submitBtn.classList.remove('loading');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -405,6 +459,12 @@ passwordForm.addEventListener('submit', async function(e) {
     
     if (!isValid) return;
     
+    if (!resetToken) {
+        alert('Lỗi: Token không hợp lệ. Vui lòng thực hiện lại từ đầu.');
+        goToStep(1);
+        return;
+    }
+    
     const submitBtn = this.querySelector('.submit-button');
     const originalText = submitBtn.innerHTML;
     
@@ -419,6 +479,8 @@ passwordForm.addEventListener('submit', async function(e) {
         goToStep(4);
         
     } catch (error) {
+        console.error('Error in step 3:', error);
+        
         submitBtn.classList.remove('loading');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -459,4 +521,5 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('🔐 Forgot Password page loaded');
+console.log('🔐 Forgot Password page loaded - Fixed version');
+console.log('Current AUTH_BASE:', AUTH_BASE);

@@ -4,7 +4,7 @@
 // ========================================
 
 // ===== SSO CONFIGURATION =====
-const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbwwOc00czKNL_R57w89sVCfnrBoRqEWBHmEBXsCeKni0aWhnHoqW3cIyzt4wwTsl6CSQQ/exec';
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec';
 const APP_ID = 'PORTAL'; // AppID trong sheet APPS
 const TOKEN_KEY = 'CP_AUTH_TOKEN';
 
