@@ -1,26 +1,31 @@
-// Password Toggle
+// ========================================
+// SIGNUP.JS - CPHACO.APP (REAL BACKEND)
+// User registration with OTP verification
+// ========================================
+
+// ===== CONFIGURATION =====
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec';  // 👈 THAY URL
+
+// ===== STATE =====
+let currentStep = 1;  // 1 = Form, 2 = OTP
+let userEmail = '';
+let userFullname = '';
+let userPassword = '';
+
+// ===== DOM ELEMENTS =====
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
-
-togglePassword.addEventListener('click', function() {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    this.style.color = type === 'text' ? 'var(--primary-blue)' : 'var(--text-light)';
-});
-
-// Form Elements
 const signupForm = document.getElementById('signupForm');
 const fullnameInput = document.getElementById('fullname');
 const emailInput = document.getElementById('email');
 const termsCheckbox = document.getElementById('terms');
 
-// Email validation
+// ===== VALIDATION HELPERS =====
+
 function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Password validation requirements
 const passwordRequirements = {
     length: password => password.length >= 8,
     uppercase: password => /[A-Z]/.test(password),
@@ -28,7 +33,6 @@ const passwordRequirements = {
     number: password => /[0-9]/.test(password)
 };
 
-// Check password strength
 function checkPasswordStrength(password) {
     const requirements = document.querySelectorAll('[data-requirement]');
     let metCount = 0;
@@ -48,15 +52,6 @@ function checkPasswordStrength(password) {
     return metCount === requirements.length;
 }
 
-// Password input event
-passwordInput.addEventListener('input', function() {
-    checkPasswordStrength(this.value);
-    if (this.classList.contains('error')) {
-        removeError(this);
-    }
-});
-
-// Show error message
 function showError(input, message) {
     const existingError = input.parentElement.parentElement.querySelector('.error-message');
     if (existingError) {
@@ -69,7 +64,6 @@ function showError(input, message) {
     errorDiv.className = 'error-message';
     errorDiv.innerHTML = `⚠️ ${message}`;
     
-    // Insert after password requirements if it exists
     const passwordReqs = input.parentElement.parentElement.querySelector('.password-requirements');
     if (passwordReqs) {
         passwordReqs.insertAdjacentElement('afterend', errorDiv);
@@ -78,7 +72,6 @@ function showError(input, message) {
     }
 }
 
-// Remove error message
 function removeError(input) {
     input.classList.remove('error');
     const errorMessage = input.parentElement.parentElement.querySelector('.error-message');
@@ -87,7 +80,25 @@ function removeError(input) {
     }
 }
 
-// Validation on blur
+// ===== PASSWORD TOGGLE =====
+
+if (togglePassword) {
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.style.color = type === 'text' ? 'var(--primary-blue)' : 'var(--text-light)';
+    });
+}
+
+// ===== REAL-TIME VALIDATION =====
+
+passwordInput.addEventListener('input', function() {
+    checkPasswordStrength(this.value);
+    if (this.classList.contains('error')) {
+        removeError(this);
+    }
+});
+
 fullnameInput.addEventListener('blur', function() {
     if (this.value && this.value.length < 2) {
         showError(this, 'Họ tên phải có ít nhất 2 ký tự');
@@ -112,7 +123,6 @@ passwordInput.addEventListener('blur', function() {
     }
 });
 
-// Clear error on input
 fullnameInput.addEventListener('input', function() {
     if (this.classList.contains('error')) {
         removeError(this);
@@ -125,12 +135,87 @@ emailInput.addEventListener('input', function() {
     }
 });
 
-// Form Submit
+// ===== API CALLS =====
+
+/**
+ * Send OTP to email
+ */
+async function sendOTP(email) {
+    try {
+        console.log('Sending OTP to:', email);
+        
+        const response = await fetch(AUTH_BASE, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({
+                action: 'send-otp',
+                email: email
+            })
+        });
+        
+        const data = await response.json();
+        console.log('Send OTP response:', data);
+        
+        if (!data.ok) {
+            throw new Error(data.error || 'Không thể gửi OTP');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Send OTP error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Register user with OTP verification
+ */
+async function registerUser(fullname, email, password, otpCode) {
+    try {
+        console.log('Registering user:', email);
+        
+        const response = await fetch(AUTH_BASE, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({
+                action: 'signup',
+                fullname: fullname,
+                email: email,
+                password: password,
+                otpCode: otpCode
+            })
+        });
+        
+        const data = await response.json();
+        console.log('Signup response:', data);
+        
+        if (!data.ok) {
+            throw new Error(data.error || 'Đăng ký thất bại');
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Signup error:', error);
+        throw error;
+    }
+}
+
+// ===== FORM SUBMISSION =====
+
 signupForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Validate all fields
     let isValid = true;
+    
+    // Remove previous errors
+    removeError(fullnameInput);
+    removeError(emailInput);
+    removeError(passwordInput);
     
     // Validate fullname
     if (!fullnameInput.value) {
@@ -171,14 +256,42 @@ signupForm.addEventListener('submit', async function(e) {
     const submitButton = this.querySelector('.submit-button');
     const originalText = submitButton.innerHTML;
     submitButton.classList.add('loading');
-    submitButton.innerHTML = '<span>Đang tạo tài khoản...</span>';
+    submitButton.innerHTML = '<span>Đang gửi OTP...</span>';
+    submitButton.disabled = true;
     
-    // Simulate API call (replace with actual registration)
     try {
-        await simulateSignup(fullnameInput.value, emailInput.value, passwordInput.value);
+        // Save form data
+        userFullname = fullnameInput.value;
+        userEmail = emailInput.value;
+        userPassword = passwordInput.value;
+        
+        // Send OTP
+        await sendOTP(userEmail);
+        
+        submitButton.innerHTML = '<span>OTP đã được gửi!</span>';
+        
+        // Wait 1 second
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Prompt for OTP
+        const otpCode = prompt(`Mã OTP đã được gửi đến ${userEmail}\n\nVui lòng nhập mã OTP (6 chữ số):`);
+        
+        if (!otpCode) {
+            throw new Error('Bạn chưa nhập OTP');
+        }
+        
+        if (!/^\d{6}$/.test(otpCode)) {
+            throw new Error('OTP phải là 6 chữ số');
+        }
+        
+        // Register with OTP
+        submitButton.innerHTML = '<span>Đang tạo tài khoản...</span>';
+        
+        const result = await registerUser(userFullname, userEmail, userPassword, otpCode);
         
         // Success
         showSuccessMessage();
+        submitButton.innerHTML = '<span>✓ Thành công!</span>';
         
         // Redirect after 2 seconds
         setTimeout(() => {
@@ -186,50 +299,28 @@ signupForm.addEventListener('submit', async function(e) {
         }, 2000);
         
     } catch (error) {
+        console.error('Registration error:', error);
+        
         submitButton.classList.remove('loading');
         submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
         
-        if (error.field === 'email') {
+        if (error.message.includes('Email') || error.message.includes('email')) {
             showError(emailInput, error.message);
         } else {
             alert(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
         }
+        
+        // Shake animation
+        signupForm.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+            signupForm.style.animation = '';
+        }, 500);
     }
 });
 
-// Simulate signup (replace with actual API call)
-function simulateSignup(fullname, email, password) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // Check if email already exists (demo)
-            const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-            const emailExists = existingUsers.some(user => user.email === email);
-            
-            if (emailExists) {
-                reject({ 
-                    field: 'email',
-                    message: 'Email này đã được sử dụng' 
-                });
-                return;
-            }
-            
-            // Save user (demo - in production, send to backend)
-            const newUser = {
-                fullname,
-                email,
-                password, // In production, NEVER store plain passwords!
-                createdAt: new Date().toISOString()
-            };
-            
-            existingUsers.push(newUser);
-            localStorage.setItem('users', JSON.stringify(existingUsers));
-            
-            resolve({ success: true });
-        }, 1500);
-    });
-}
+// ===== SUCCESS MESSAGE =====
 
-// Show success message
 function showSuccessMessage() {
     const existingSuccess = document.querySelector('.success-message');
     if (existingSuccess) {
@@ -241,36 +332,24 @@ function showSuccessMessage() {
     successDiv.textContent = '✓ Tạo tài khoản thành công! Đang chuyển đến trang đăng nhập...';
     
     const formHeader = document.querySelector('.form-header');
-    formHeader.insertAdjacentElement('afterend', successDiv);
+    if (formHeader) {
+        formHeader.insertAdjacentElement('afterend', successDiv);
+    }
 }
 
-// Social Login Handlers
-const googleButton = document.querySelector('.google-button');
-const microsoftButton = document.querySelector('.microsoft-button');
+// ===== VISUAL ENHANCEMENTS =====
 
-googleButton.addEventListener('click', function() {
-    handleSocialSignup('Google');
+// Auto-capitalize fullname
+fullnameInput.addEventListener('input', function() {
+    const words = this.value.split(' ');
+    const capitalizedWords = words.map(word => {
+        if (word.length > 0) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }
+        return word;
+    });
+    this.value = capitalizedWords.join(' ');
 });
-
-microsoftButton.addEventListener('click', function() {
-    handleSocialSignup('Microsoft');
-});
-
-function handleSocialSignup(provider) {
-    const button = event.currentTarget;
-    const originalText = button.innerHTML;
-    button.style.opacity = '0.7';
-    button.style.pointerEvents = 'none';
-    button.innerHTML = `<span>Đang kết nối với ${provider}...</span>`;
-    
-    setTimeout(() => {
-        button.style.opacity = '1';
-        button.style.pointerEvents = 'auto';
-        button.innerHTML = originalText;
-        
-        alert(`Đăng ký với ${provider} sẽ được triển khai trong phiên bản production.`);
-    }, 1000);
-}
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
@@ -284,7 +363,6 @@ document.addEventListener('keydown', function(e) {
         removeError(emailInput);
         removeError(passwordInput);
         
-        // Reset password requirements
         document.querySelectorAll('[data-requirement]').forEach(req => {
             req.classList.remove('met');
         });
@@ -372,21 +450,32 @@ style.textContent = `
             opacity: 0;
         }
     }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
 `;
 document.head.appendChild(style);
 
-// Auto-capitalize fullname
-fullnameInput.addEventListener('input', function() {
-    // Capitalize first letter of each word
-    const words = this.value.split(' ');
-    const capitalizedWords = words.map(word => {
-        if (word.length > 0) {
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        }
-        return word;
-    });
-    this.value = capitalizedWords.join(' ');
-});
+// Social Login Handlers (placeholder)
+const googleButton = document.querySelector('.google-button');
+const microsoftButton = document.querySelector('.microsoft-button');
 
-console.log('📝 Cphaco.app Sign Up loaded successfully!');
-console.log('🔐 Demo mode: All data stored in localStorage');
+if (googleButton) {
+    googleButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Đăng ký với Google sẽ được triển khai trong phiên bản production.');
+    });
+}
+
+if (microsoftButton) {
+    microsoftButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Đăng ký với Microsoft sẽ được triển khai trong phiên bản production.');
+    });
+}
+
+console.log('📝 Signup.js loaded - Real Backend Mode');
+console.log('AUTH_BASE:', AUTH_BASE);

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>CPHACO – Quyền riêng tư</title>
+  <link rel="icon" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <!-- Reuse màu & layout base từ dự án -->
+  <link rel="stylesheet" href="styles.css"/>
+
+  <style>
+    /* ====== Privacy Page Overrides (giữ sáng – tươi) ====== */
+    :root{
+      --ink: var(--text-primary);
+      --muted: var(--text-secondary);
+      --card: var(--bg-card);
+      --radius: 20px;
+      --stroke: var(--border-color);
+    }
+    body{ background: linear-gradient(180deg,#f8fbff, #ffffff 40%, #f6f9ff 100%); }
+
+    /* Top Notice */
+    .topbar{
+      position: sticky; top:0; z-index:999;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255,255,255,.75);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .topbar .container{
+      display:flex; align-items:center; gap:1rem; padding: .75rem 2rem;
+      font-size:.9375rem; color:var(--muted);
+    }
+    .topbar .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+      box-shadow:0 0 0 4px rgba(0,102,255,.12);
+      flex:0 0 10px;
+    }
+
+    /* Hero */
+    .privacy-hero{
+      position:relative; padding:10rem 0 5rem; text-align:center; overflow:hidden;
+    }
+    .privacy-hero .orb{
+      position:absolute; border-radius:50%; filter: blur(80px); opacity:.45; z-index:0;
+      animation: float 22s ease-in-out infinite;
+    }
+    .privacy-hero .o1{ width:520px;height:520px; background:linear-gradient(135deg,var(--gradient-start),#7dd3fc); top:-120px; right:-160px;}
+    .privacy-hero .o2{ width:420px;height:420px; background:linear-gradient(135deg,#a78bfa,#60a5fa); bottom:-140px; left:-160px; animation-delay:-7s;}
+    .privacy-hero .o3{ width:320px;height:320px; background:linear-gradient(135deg,#f093fb,#f5576c); top:40%; left:35%; animation-delay:-12s;}
+    @keyframes float{0%,100%{transform:translate(0,0)} 33%{transform:translate(24px,-24px)} 66%{transform:translate(-20px,20px)}}
+
+    .privacy-hero .container{ position:relative; z-index:1; }
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.5rem 1rem; border-radius:999px; background:#fff; box-shadow:var(--shadow-md);
+      color:var(--primary-blue); font-weight:600; font-size:.9rem;
+    }
+    .eyebrow .shield{font-size:1.05rem}
+    .hero-title{
+      margin:1.25rem auto .75rem; max-width:960px;
+      font-size: clamp(2rem, 5vw, 4rem); line-height:1.1; font-weight:800; color:var(--ink);
+    }
+    .hero-title .grad{
+      background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .hero-desc{
+      max-width:840px; margin:0 auto 2rem; color:var(--muted); font-size:1.1rem; line-height:1.7;
+    }
+    .hero-cta{
+      display:flex; gap:.75rem; justify-content:center; margin-top:1rem;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:.5rem; padding:.75rem 1rem;
+      background:#fff; border:1px solid var(--stroke); border-radius:14px; font-weight:600; text-decoration:none; color:var(--ink);
+      transition:.25s; box-shadow:var(--shadow-sm);
+    }
+    .chip:hover{ transform:translateY(-2px); border-color:var(--primary-blue); box-shadow:var(--shadow-lg); }
+
+    /* Pillars */
+    .section{ padding: 4.5rem 0; }
+    .section-header{ text-align:center; margin-bottom:2.5rem;}
+    .section-title{ font-size:2rem; font-weight:800; color:var(--ink); }
+    .section-sub{ color:var(--muted); max-width:760px; margin: .5rem auto 0; }
+
+    .pillars{
+      display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:1.25rem;
+    }
+    .pillar{
+      background: #fff; border:1px solid var(--stroke); border-radius:18px; padding:1.5rem;
+      box-shadow: var(--shadow-md); transition:.25s; position:relative; overflow:hidden;
+    }
+    .pillar::after{
+      content:""; position:absolute; inset:0; opacity:0;
+      background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+      transition: .3s;
+    }
+    .pillar:hover{ transform:translateY(-3px); border-color:var(--primary-blue); box-shadow:var(--shadow-xl); }
+    .pillar h3{ position:relative; z-index:1; font-size:1.125rem; margin:.5rem 0 .25rem; }
+    .pillar p{ position:relative; z-index:1; color:var(--muted); font-size:.975rem; line-height:1.6;}
+    .glyph{
+      width:44px;height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end)); color:#fff; box-shadow:var(--shadow-md);
+    }
+
+    /* Data Map (cards + timeline feel) */
+    .grid-2{ display:grid; grid-template-columns:1.2fr .8fr; gap:2rem; align-items:start; }
+    .card{
+      background:#fff; border:1px solid var(--stroke); border-radius:20px; padding:1.5rem; box-shadow:var(--shadow-lg);
+    }
+    .list{
+      display:grid; gap:1rem; margin-top:1rem;
+    }
+    .row{ display:flex; align-items:flex-start; gap:.75rem; }
+    .tag{
+      font-size:.8rem; font-weight:700; padding:.25rem .6rem; border:1px solid var(--stroke); border-radius:999px; color:var(--muted); background:#fff;
+    }
+    .ok{ color:#059669; border-color:#05966933; background:#0596690d; }
+    .warn{ color:#b45309; border-color:#b4530933; background:#b453090d; }
+    .danger{ color:#dc2626; border-color:#dc262633; background:#dc26260d; }
+
+    /* Accordion */
+    .accordion{ border:1px solid var(--stroke); border-radius:16px; overflow:hidden; background:#fff; }
+    .accordion-item + .accordion-item{ border-top:1px solid var(--stroke); }
+    .acc-head{
+      width:100%; text-align:left; padding:1.1rem 1.25rem; background:#fff; border:0; font-weight:700; font-size:1rem; cursor:pointer;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .acc-body{ display:none; padding:0 1.25rem 1.25rem; color:var(--muted); line-height:1.7; }
+    .acc-item-open .acc-body{ display:block; }
+
+    /* Footer CTA */
+    .cta-box{
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color:#fff; border-radius:24px; padding:2rem; display:flex; align-items:center; gap:1rem; justify-content:space-between;
+      box-shadow:0 24px 60px rgba(0,102,255,.25);
+    }
+    .cta-box a{ background:#fff; color:var(--primary-blue); border-radius:12px; padding:.9rem 1.25rem; text-decoration:none; font-weight:800; }
+    .cta-sub{ opacity:.95; }
+
+    /* Local nav */
+    .local-nav{
+      position:sticky; top:64px; align-self:start;
+      background:rgba(255,255,255,.7); backdrop-filter: blur(10px);
+      border:1px solid var(--stroke); border-radius:16px; padding:1rem; box-shadow:var(--shadow-sm);
+    }
+    .local-nav a{
+      display:block; padding:.5rem .75rem; border-radius:10px; color:var(--muted); text-decoration:none; font-weight:600;
+    }
+    .local-nav a.active, .local-nav a:hover{
+      background:#fff; color:var(--ink); border:1px solid var(--stroke);
+    }
+
+    @media (max-width: 1024px){ .grid-2{grid-template-columns:1fr;} .local-nav{position:relative; top:auto;} }
+  </style>
+</head>
+<body>
+
+
+
+  <!-- Navigation (reuse styles.css classes) -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a class="nav-logo" href="#">
+        <img src="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" alt="CPHACO">
+        <span class="nav-brand">CPHACO</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="#principles">Nguyên tắc</a>
+        <a class="nav-link" href="#datamap">Dữ liệu</a>
+        <a class="nav-link" href="#controls">Kiểm soát</a>
+        <a class="nav-link" href="#faq">Hỏi đáp</a>
+        <a class="nav-link-cta" href="#contact">Liên hệ</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="privacy-hero">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+    <div class="container">
+      <div class="eyebrow">
+        <span class="shield">🛡️</span> Quyền riêng tư CPHACO
+      </div>
+      <h1 class="hero-title">
+        Quyền riêng tư là <span class="grad">tính năng cốt lõi</span>,<br/>không phải tuỳ chọn.
+      </h1>
+      <p class="hero-desc">
+        Chúng tôi hạn chế thu thập, mã hoá khi có thể, và minh bạch hoá cách dữ liệu được dùng
+        để vận hành các ứng dụng bản đồ, quản trị và dịch vụ của CPHACO.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#principles">Bắt đầu tìm hiểu</a>
+        <a class="chip" href="#legal">Chính sách & Căn cứ pháp lý →</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- PRINCIPLES -->
+  <section id="principles" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">4 nguyên tắc bảo vệ dữ liệu</h2>
+        <p class="section-sub">Thiết kế giảm thiểu – bảo mật theo mặc định – minh bạch – kiểm soát trong tay bạn.</p>
+      </div>
+      <div class="pillars">
+        <article class="pillar">
+          <div class="glyph">🔍</div>
+          <h3>Giảm thiểu dữ liệu</h3>
+          <p>Chỉ thu thập thông tin cần thiết để vận hành tính năng. Không có mục đích ẩn.</p>
+        </article>
+        <article class="pillar">
+          <div class="glyph">🔐</div>
+          <h3>Bảo mật theo mặc định</h3>
+          <p>Mã hoá khi truyền & lưu trữ (khi áp dụng). Truy cập nội bộ dựa trên vai trò.</p>
+        </article>
+        <article class="pillar">
+          <div class="glyph">🧭</div>
+          <h3>Minh bạch</h3>
+          <p>Mô tả rõ loại dữ liệu, cách dùng, thời gian lưu và nơi xử lý.</p>
+        </article>
+        <article class="pillar">
+          <div class="glyph">🎛️</div>
+          <h3>Bạn kiểm soát</h3>
+          <p>Các công cụ xem, sửa, tải về và yêu cầu xoá dữ liệu cá nhân theo luật định.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA MAP -->
+  <section id="datamap" class="section">
+    <div class="container grid-2">
+      <aside class="local-nav" id="localNav">
+        <a href="#datatypes" class="active">Loại dữ liệu</a>
+        <a href="#purposes">Mục đích sử dụng</a>
+        <a href="#retention">Lưu trữ & thời hạn</a>
+        <a href="#sharing">Chia sẻ & bên thứ ba</a>
+      </aside>
+
+      <div>
+        <div id="datatypes" class="card">
+          <h3>Loại dữ liệu chúng tôi xử lý</h3>
+          <div class="list">
+            <div class="row">
+              <span class="tag">Tài khoản</span>
+              <div>
+                Email đăng nhập, họ tên, chi nhánh, quyền truy cập (RBAC). Không bán dữ liệu cá nhân.
+              </div>
+            </div>
+            <div class="row">
+              <span class="tag">Vận hành</span>
+              <div>Nhật ký truy cập ứng dụng, sự kiện lỗi để cải thiện độ ổn định.</div>
+            </div>
+            <div class="row">
+              <span class="tag">Bản đồ</span>
+              <div>Dữ liệu vị trí lô/mộ (phi cá nhân), lớp phủ ảnh, thông số hiển thị.</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="purposes" class="card" style="margin-top:1rem">
+          <h3>Mục đích sử dụng</h3>
+          <ul class="list">
+            <li>Vận hành và cung cấp tính năng các ứng dụng OCM, Roster, v.v.</li>
+            <li>An toàn, chống gian lận và đảm bảo tuân thủ.</li>
+            <li>Phân tích tổng hợp, ẩn danh để nâng cao trải nghiệm.</li>
+          </ul>
+        </div>
+
+        <div id="retention" class="card" style="margin-top:1rem">
+          <h3>Thời hạn & nơi lưu trữ</h3>
+          <div class="list">
+            <div class="row">
+              <span class="tag ok">Nguyên tắc</span>
+              <div>Giữ dữ liệu không lâu hơn mức cần thiết cho mục đích đã nêu hoặc theo yêu cầu pháp luật.</div>
+            </div>
+            <div class="row">
+              <span class="tag">Hạ tầng</span>
+              <div>Google Workspace/Sheets/Apps Script, CDN hình ảnh và máy chủ web đã công bố trong tài liệu kỹ thuật.</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="sharing" class="card" style="margin-top:1rem">
+          <h3>Chia sẻ với bên thứ ba</h3>
+          <p>Chỉ khi cần để vận hành dịch vụ (ví dụ: nhà cung cấp hạ tầng). Không chia sẻ cho mục đích quảng cáo của bên thứ ba.</p>
+          <p><span class="tag warn">Hợp đồng xử lý</span> Tất cả nhà cung cấp đều chịu ràng buộc bảo mật & tuân thủ.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <section id="controls" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Công cụ & quyền của bạn</h2>
+        <p class="section-sub">Yêu cầu truy cập, sửa, xuất và xoá theo luật áp dụng (VD: GDPR/PDPA/VN). </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Truy cập & Chỉnh sửa</h3>
+          <p class="section-sub">Gửi yêu cầu để nhận bản sao dữ liệu cá nhân hoặc điều chỉnh thông tin sai.</p>
+          <a class="chip" href="#contact">Gửi yêu cầu →</a>
+        </div>
+        <div class="card">
+          <h3>Xuất & Xoá</h3>
+          <p class="section-sub">Tải về ở định dạng chuẩn hoặc yêu cầu xoá khi không còn cần thiết theo luật.</p>
+          <a class="chip" href="#contact">Yêu cầu xử lý →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ / LEGAL -->
+  <section id="faq" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Hỏi đáp thường gặp</h2>
+        <p class="section-sub">Thông tin cô đọng, ngắn gọn theo phong cách bảng hỏi đáp.</p>
+      </div>
+      <div class="accordion" id="accordion">
+        <div class="accordion-item acc-item-open">
+          <button class="acc-head">CPHACO có bán dữ liệu cá nhân không? <span>+</span></button>
+          <div class="acc-body">Không. Dữ liệu cá nhân không được bán hoặc cho thuê.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="acc-head">Dữ liệu được mã hoá thế nào? <span>+</span></button>
+          <div class="acc-body">Mã hoá khi truyền (HTTPS/TLS). Mã hoá lưu trữ khi áp dụng theo nền tảng hạ tầng.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="acc-head">Ai có thể truy cập dữ liệu của tôi? <span>+</span></button>
+          <div class="acc-body">Nhân sự được uỷ quyền theo vai trò, phục vụ vận hành/hỗ trợ, theo nguyên tắc tối thiểu cần biết.</div>
+        </div>
+        <div class="accordion-item" id="legal">
+          <button class="acc-head">Căn cứ pháp lý & tuân thủ <span>+</span></button>
+          <div class="acc-body">Chúng tôi tuân thủ luật bảo vệ dữ liệu hiện hành tại khu vực triển khai dịch vụ. Thông tin chi tiết (DPA/Thoả thuận xử lý dữ liệu) được cung cấp theo yêu cầu.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / CTA -->
+  <section id="contact" class="section">
+    <div class="container">
+      <div class="cta-box">
+        <div>
+          <h3 style="margin:0 0 .25rem 0; font-size:1.6rem; font-weight:800;">Cần hỗ trợ về dữ liệu cá nhân?</h3>
+          <div class="cta-sub">Liên hệ bộ phận bảo vệ dữ liệu để yêu cầu truy cập, sửa, xuất hoặc xoá.</div>
+        </div>
+        <a href="mailto:privacy@cphaco.vn">Liên hệ privacy@cphaco.vn</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (reuse styles.css footer) -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img style="width: 80px;" src="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" alt="CPHACO">
+          <div class="footer-brand-name">CPHACO</div>
+          <div class="footer-tagline">Thiết kế sản phẩm bắt đầu từ quyền riêng tư.</div>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Trang chính</h4>
+            <a href="#principles">Nguyên tắc</a>
+            <a href="#datamap">Dữ liệu</a>
+            <a href="#controls">Kiểm soát</a>
+          </div>
+          <div class="footer-column">
+            <h4>Pháp lý</h4>
+            <a href="#legal">Căn cứ pháp lý</a>
+            <a href="#faq">Hỏi đáp</a>
+            <a href="#contact">Liên hệ</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© <span id="y"></span> CPHACO. Tất cả quyền được bảo lưu.</div>
+        <div class="footer-bottom-links">
+          <a href="#">Điều khoản</a>
+          <a href="#">Cookie</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // năm bản quyền
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // nav on scroll
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', window.scrollY > 10));
+
+    // accordion
+    document.querySelectorAll('.acc-head').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const item = btn.parentElement;
+        const open = item.classList.contains('acc-item-open');
+        document.querySelectorAll('.accordion-item').forEach(i=>i.classList.remove('acc-item-open'));
+        if(!open) item.classList.add('acc-item-open');
+      });
+    });
+
+    // local nav active
+    const sections = ['datatypes','purposes','retention','sharing'].map(id=>document.getElementById(id));
+    const links = Array.from(document.querySelectorAll('#localNav a'));
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          links.forEach(a=>a.classList.remove('active'));
+          const active = document.querySelector('#localNav a[href="#'+e.target.id+'"]');
+          if(active) active.classList.add('active');
+        }
+      });
+    },{rootMargin:'-40% 0px -55% 0px', threshold:[0,1]});
+    sections.forEach(s=>observer.observe(s));
+  </script>
+</body>
+</html>
