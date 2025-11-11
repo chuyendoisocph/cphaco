@@ -4,7 +4,7 @@
 // ========================================
 
 // ===== CONFIGURATION =====
-const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbzulb1k4SqLTxnPxVEYrlu6LA3qVI8_CYMN7ARAihvw-WJRM3jYQaAqSh8fgX690Lziew/exec';
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbwwOc00czKNL_R57w89sVCfnrBoRqEWBHmEBXsCeKni0aWhnHoqW3cIyzt4wwTsl6CSQQ/exec';
 const TOKEN_KEY = 'CP_AUTH_TOKEN';
 
 // ===== APPS DATABASE (định nghĩa sẵn các app có trong hệ thống) =====
