@@ -1,282 +1,629 @@
-// Apps Data - Configure permissions here
-const apps = [
-    {
-        id: 1,
-        name: 'Bản đồ số',
-        description: 'Hệ thống định vị và tìm kiếm vị trí mộ phần trực quan, nhanh chóng',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        url: 'https://script.google.com/macros/s/AKfycbwKuTqXLyIkR8L5htnYDkHFi-HRIIdFo1dnL9XnMa-nIqmMLsdTvczEsVv1xD_Vn4_e/exec',
-        badge: 'popular',
-        uses: 1243,
-        rating: 4.8
-    },
-    {
-        id: 2,
-        name: 'Đăng ký lịch trực',
-        description: 'Quản lý lịch trực và phân công công việc cho nhân viên',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+// ========================================
+// DASHBOARD.JS - CPHACO.APP
+// SSO Integration với Central Auth
+// ========================================
+
+// ===== CONFIGURATION =====
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbzulb1k4SqLTxnPxVEYrlu6LA3qVI8_CYMN7ARAihvw-WJRM3jYQaAqSh8fgX690Lziew/exec';
+const TOKEN_KEY = 'CP_AUTH_TOKEN';
+
+// ===== APPS DATABASE (định nghĩa sẵn các app có trong hệ thống) =====
+const APPS_DATABASE = {
+    'BQT001': {
+        id: 'BQT001',
+        name: 'Đăng ký trực BQT',
+        description: 'Quản lý lịch trực Ban Quản Trang',
         url: 'https://script.google.com/macros/s/AKfycbyc0dNDh8rlTn9K0W0CHnHAT2QDgtxqpvXz7g1SfZaOWkel3lDv3_8coBN4Vb7Y8rGwpg/exec',
-        badge: 'new',
-        uses: 856,
-        rating: 4.9
+        icon: '📅',
+        color: 'linear-gradient(135deg, #667eea, #764ba2)',
+        status: 'active'
     },
-    {
-        id: 3,
-        name: 'Khảo sát chất lượng',
-        description: 'Thu thập phản hồi và đánh giá chất lượng phục vụ',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        url: 'https://script.google.com/macros/s/AKfycbw2kb9e8QKC_ctbqpJMvPBJcoOAXQ2xZUk6ofiUOT1IItKF_t8h1D9kWrvEUV8h2Ng7tg/exec',
-        uses: 654,
-        rating: 4.7
+    'MAP001': {
+        id: 'MAP001',
+        name: 'Bản đồ số',
+        description: 'Bản đồ số hoa viên OCM',
+        url: 'https://script.google.com/macros/s/AKfycbwKuTqXLyIkR8L5htnYDkHFi-HRIIdFo1dnL9XnMa-nIqmMLsdTvczEsVv1xD_Vn4_e/exec',
+        icon: '🗺️',
+        color: 'linear-gradient(135deg, #f093fb, #f5576c)',
+        status: 'active'
     },
-    {
-        id: 4,
-        name: 'Tra cứu mộ phần',
-        description: 'Tìm kiếm thông tin mộ phần nhanh chóng và chính xác',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        url: 'https://script.google.com/macros/s/AKfycbyaZ-Bp2RiS4OhGeiPS6jeP0FVIeMcHGf41H2oxrlzS0SBGhegGnMPhiAtcEc8d84Za/exec',
-        uses: 2341,
-        rating: 4.9
-    },
-    {
-        id: 5,
-        name: 'Quản lý Tổ trưởng',
-        description: 'Theo dõi và quản lý hoạt động của các tổ trưởng',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-        url: 'https://script.google.com/macros/s/AKfycbyNVy2eYv5ZqiKfXvxKm9T0OY2KHqr0P2rlCJB9LrRCpQnvfMfwNMOCN_cCeFU7YvOm/exec',
-        uses: 432,
-        rating: 4.6
-    },
-    {
-        id: 7,
-        name: 'Cộng tác viên',
-        description: 'Quản lý thông tin và hoạt động của cộng tác viên',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-        url: 'https://script.google.com/macros/s/AKfycbxqXqfsij6GWAiaHSQOCsZeES4LvR8EM00LCGR0OztH-pNt_TLBnCBc5F35skl3RUmC/exec',
-        uses: 789,
-        rating: 4.8
-    },
-    {
-        id: 8,
+    'CARE001': {
+        id: 'CARE001',
         name: 'Khu chăm sóc',
-        description: 'Quản lý các khu vực chăm sóc và bảo dưỡng',
-        icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>`,
-        gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+        description: 'Quản lý khu chăm sóc và biên bản',
         url: 'https://script.google.com/macros/s/AKfycby5BJzivbuW-tP1uj0wiFLoGIOYuqlhF1tlI1K0K2V7vrLsjN-8mFmVjeIcEU_2b8sW/exec',
-        uses: 567,
-        rating: 4.7
+        icon: '🌸',
+        color: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+        status: 'active'
+    },
+    'SURVEY001': {
+        id: 'SURVEY001',
+        name: 'Khảo sát TPT',
+        description: 'Khảo sát chất lượng phục vụ Thiên Phước Tự',
+        url: 'https://script.google.com/macros/s/AKfycbw2kb9e8QKC_ctbqpJMvPBJcoOAXQ2xZUk6ofiUOT1IItKF_t8h1D9kWrvEUV8h2Ng7tg/exec',
+        icon: '📊',
+        color: 'linear-gradient(135deg, #fa709a, #fee140)',
+        status: 'active'
+    },
+    'ENCODE001': {
+        id: 'ENCODE001',
+        name: 'Mã hóa vị trí',
+        description: 'Công cụ chuyển đổi mã vị trí OCM',
+        url: 'https://script.google.com/macros/s/AKfycbyaZ-Bp2RiS4OhGeiPS6jeP0FVIeMcHGf41H2oxrlzS0SBGhegGnMPhiAtcEc8d84Za/exec',
+        icon: '🔐',
+        color: 'linear-gradient(135deg, #a8edea, #fed6e3)',
+        status: 'active'
+    },
+    'EDIT001': {
+        id: 'EDIT001',
+        name: 'OCM Editor',
+        description: 'Editor bản đồ OCM',
+        url: 'https://script.google.com/macros/s/AKfycbwUBElq6ZaGnaPiAkU4bIH0RBK8Li1iT1DmCvmdGN_vhuRKEXF6qzqk5n26vEv07z9GfA/exec',
+        icon: '✏️',
+        color: 'linear-gradient(135deg, #ff9a9e, #fecfef)',
+        status: 'active'
+    },
+    'CTV001': {
+        id: 'CTV001',
+        name: 'Cộng tác viên',
+        description: 'Portal cộng tác viên (Public)',
+        url: 'https://script.google.com/macros/s/AKfycbxqXqfsij6GWAiaHSQOCsZeES4LvR8EM00LCGR0OztH-pNt_TLBnCBc5F35skl3RUmC/exec',
+        icon: '👥',
+        color: 'linear-gradient(135deg, #fbc2eb, #a6c1ee)',
+        status: 'active'
     }
-];
+};
 
-// Motivational Quotes
-const quotes = [
-    "Hôm nay là một ngày tuyệt vời để làm những điều tuyệt vời!",
-    "Mỗi ngày là một cơ hội mới để phát triển bản thân.",
-    "Thành công bắt đầu từ những điều nhỏ nhất.",
-    "Hãy biến ước mơ thành hiện thực!",
-    "Bạn mạnh mẽ hơn bạn nghĩ!",
-    "Hãy tạo ra sự khác biệt ngày hôm nay!",
-    "Nhiệt huyết là chìa khóa của thành công.",
-    "Mỗi bước tiến đều có ý nghĩa!"
-];
+// ===== GLOBAL STATE =====
+let currentUser = null;
+let userApps = [];
+let allActivities = [];
 
-// Get greeting based on time
-function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Chào buổi sáng";
-    if (hour < 18) return "Chào buổi chiều";
-    return "Chào buổi tối";
+// ===== AUTHENTICATION =====
+
+/**
+ * Kiểm tra authentication khi load trang
+ */
+function checkAuth() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    
+    if (!token) {
+        // Chưa đăng nhập -> redirect về signin
+        redirectToSignin();
+        return false;
+    }
+
+    try {
+        // Decode token (simple JWT decode - không verify signature ở client)
+        const payload = parseJWT(token);
+        
+        // Kiểm tra token có hết hạn không
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+            console.warn('Token đã hết hạn');
+            redirectToSignin();
+            return false;
+        }
+
+        // Lưu thông tin user
+        currentUser = payload;
+        return true;
+        
+    } catch (error) {
+        console.error('Invalid token:', error);
+        redirectToSignin();
+        return false;
+    }
 }
 
-// Get random quote
-function getRandomQuote() {
-    return quotes[Math.floor(Math.random() * quotes.length)];
+/**
+ * Parse JWT token (client-side decode, không verify)
+ */
+function parseJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
+            '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        ).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        throw new Error('Invalid token format');
+    }
 }
 
-// Initialize Dashboard
-function initializeDashboard() {
-    // Set greeting
-    document.getElementById('greeting').textContent = getGreeting();
-    document.getElementById('motivationalQuote').textContent = getRandomQuote();
+/**
+ * Redirect về trang signin
+ */
+function redirectToSignin() {
+    const currentPath = window.location.pathname;
+    window.location.href = `signin.html?returnTo=${encodeURIComponent(currentPath)}`;
+}
+
+/**
+ * Đăng xuất
+ */
+function logout() {
+    // Xóa token
+    localStorage.removeItem(TOKEN_KEY);
     
-    // Get user name from localStorage or use default
-    const userName = localStorage.getItem('userName') || 'Văn A';
-    document.getElementById('userNameDisplay').textContent = userName;
-    document.getElementById('userName').textContent = `Nguyễn ${userName}`;
-    document.getElementById('dropdownUserName').textContent = `Nguyễn ${userName}`;
+    // Xóa remembered email nếu có
+    localStorage.removeItem('rememberedEmail');
     
-    // Load apps
-    loadApps();
+    // Hiển thị thông báo
+    showToast('Đã đăng xuất thành công', 'success');
     
-    // Load activities
-    loadActivities();
-    
-    // Load notifications
-    loadNotifications();
-    
-    // Animate stats
-    animateStats();
-    
-    // Show welcome achievement
+    // Redirect về signin sau 1s
     setTimeout(() => {
-        showAchievement(`Chào mừng trở lại, ${userName}!`);
+        window.location.href = 'signin.html';
     }, 1000);
 }
 
-// Load Apps
-function loadApps() {
-    const appsGrid = document.getElementById('appsGrid');
-    appsGrid.innerHTML = '';
+// ===== USER INFO =====
+
+/**
+ * Load và hiển thị thông tin user
+ */
+function loadUserInfo() {
+    if (!currentUser) return;
+
+    const userName = currentUser.name || currentUser.email || 'User';
+    const userRole = currentUser.role || 'Nhân viên';
+    const userEmail = currentUser.email || '';
+
+    // Cập nhật tên user ở nhiều nơi
+    const userNameElements = document.querySelectorAll('#userName, #userNameDisplay, #dropdownUserName');
+    userNameElements.forEach(el => {
+        if (el) el.textContent = userName;
+    });
+
+    // Cập nhật role
+    const userRoleElements = document.querySelectorAll('.user-role');
+    userRoleElements.forEach(el => {
+        if (el) el.textContent = userRole;
+    });
+
+    // Cập nhật email trong dropdown
+    const emailElement = document.querySelector('.dropdown-user-email');
+    if (emailElement) emailElement.textContent = userEmail;
+
+    // Cập nhật greeting theo thời gian
+    updateGreeting();
     
-    apps.forEach((app, index) => {
-        const appCard = document.createElement('a');
-        appCard.href = app.url;
-        appCard.target = '_blank';
-        appCard.className = 'app-card';
-        appCard.style.animationDelay = `${index * 0.1}s`;
-        
-        let badgeHTML = '';
-        if (app.badge === 'new') {
-            badgeHTML = '<span class="app-badge new">Mới</span>';
-        } else if (app.badge === 'popular') {
-            badgeHTML = '<span class="app-badge popular">Phổ biến</span>';
-        }
-        
-        appCard.innerHTML = `
-            <div class="app-card-header">
-                <div class="app-icon-large" style="background: ${app.gradient};">
-                    ${app.icon}
-                </div>
-                ${badgeHTML}
-            </div>
-            <div class="app-card-body">
-                <h3 class="app-card-title">${app.name}</h3>
-                <p class="app-card-description">${app.description}</p>
-            </div>
-            <div class="app-card-footer">
-                <div class="app-stats">
-                    <div class="app-stat">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M8 1.33334L10.06 5.50668L14.6667 6.18001L11.3333 9.42668L12.12 14.0133L8 11.8467L3.88 14.0133L4.66667 9.42668L1.33334 6.18001L5.94 5.50668L8 1.33334Z" fill="currentColor"/>
-                        </svg>
-                        ${app.rating}
-                    </div>
-                    <div class="app-stat">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M13.3333 8V12.6667C13.3333 13.0203 13.1929 13.3594 12.9428 13.6095C12.6928 13.8595 12.3536 14 12 14H4C3.64638 14 3.30724 13.8595 3.05719 13.6095C2.80714 13.3594 2.66667 13.0203 2.66667 12.6667V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M10.6667 4L8 1.33334L5.33334 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8 1.33334V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        ${app.uses}
-                    </div>
-                </div>
-                <button class="app-launch-btn" onclick="event.preventDefault(); launchApp('${app.name}', '${app.url}')">
-                    <span>Mở</span>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M12 8.66667V12.6667C12 13.0203 11.8595 13.3594 11.6095 13.6095C11.3594 13.8595 11.0203 14 10.6667 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V5.33333C2 4.97971 2.14048 4.64057 2.39052 4.39052C2.64057 4.14048 2.97971 4 3.33333 4H7.33333M10 2H14M14 2V6M14 2L6.66667 9.33333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+    // Cập nhật motivational quote
+    updateMotivationalQuote();
+}
+
+/**
+ * Cập nhật lời chào theo thời gian
+ */
+function updateGreeting() {
+    const hour = new Date().getHours();
+    let greeting = 'Chào buổi sáng';
+    
+    if (hour >= 12 && hour < 18) {
+        greeting = 'Chào buổi chiều';
+    } else if (hour >= 18 || hour < 5) {
+        greeting = 'Chào buổi tối';
+    }
+
+    const greetingElement = document.getElementById('greeting');
+    if (greetingElement) {
+        greetingElement.textContent = greeting;
+    }
+}
+
+/**
+ * Cập nhật câu trích dẫn động lực
+ */
+function updateMotivationalQuote() {
+    const quotes = [
+        'Hôm nay là một ngày tuyệt vời để làm những điều tuyệt vời!',
+        'Hãy bắt đầu ngày mới với năng lượng tích cực!',
+        'Mỗi ngày là một cơ hội mới để phát triển!',
+        'Nỗ lực của bạn hôm nay sẽ tạo nên thành công ngày mai!',
+        'Hãy làm việc thông minh và hiệu quả!',
+        'Chúc bạn có một ngày làm việc hiệu quả!'
+    ];
+    
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    const quoteElement = document.getElementById('motivationalQuote');
+    if (quoteElement) {
+        quoteElement.textContent = randomQuote;
+    }
+}
+
+// ===== APPS MANAGEMENT =====
+
+/**
+ * Load danh sách apps mà user có quyền truy cập
+ */
+function loadUserApps() {
+    if (!currentUser) return;
+
+    // Lấy danh sách app IDs từ token (nếu có)
+    const permissions = currentUser.permissions || [];
+    
+    // Nếu user là ADMIN -> có quyền truy cập tất cả apps
+    if (currentUser.role === 'ADMIN') {
+        userApps = Object.values(APPS_DATABASE);
+    } else {
+        // Lọc apps theo permissions
+        userApps = permissions
+            .filter(p => p.canView) // Chỉ lấy app có quyền view
+            .map(p => APPS_DATABASE[p.appId])
+            .filter(app => app); // Loại bỏ undefined
+    }
+
+    // Hiển thị apps
+    displayApps(userApps);
+}
+
+/**
+ * Hiển thị danh sách apps
+ */
+function displayApps(apps) {
+    const appsGrid = document.getElementById('appsGrid');
+    if (!appsGrid) return;
+
+    if (apps.length === 0) {
+        appsGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📱</div>
+                <h3 class="empty-state-title">Chưa có ứng dụng</h3>
+                <p class="empty-state-description">
+                    Bạn chưa được cấp quyền truy cập ứng dụng nào.<br>
+                    Vui lòng liên hệ quản trị viên để được hỗ trợ.
+                </p>
             </div>
         `;
-        
-        appsGrid.appendChild(appCard);
+        return;
+    }
+
+    appsGrid.innerHTML = apps.map(app => `
+        <a href="${app.url}" class="app-card" data-app-id="${app.id}">
+            <div class="app-icon-wrapper">
+                <div class="app-icon" style="background: ${app.color};">
+                    ${app.icon}
+                </div>
+            </div>
+            <div class="app-details">
+                <div class="app-name">${app.name}</div>
+                <div class="app-description">${app.description}</div>
+                <span class="app-status ${app.status}">
+                    ${app.status === 'active' ? '● Hoạt động' : '⏳ Sắp ra mắt'}
+                </span>
+            </div>
+            <svg class="app-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" 
+                      stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    `).join('');
+
+    // Add fade-in animation
+    const cards = appsGrid.querySelectorAll('.app-card');
+    cards.forEach((card, index) => {
+        card.style.animation = `fadeIn 0.6s ease ${index * 0.1}s both`;
     });
 }
 
-// Launch App
-function launchApp(appName, appUrl) {
-    // Track app launch
-    const launches = JSON.parse(localStorage.getItem('appLaunches') || '{}');
-    launches[appName] = (launches[appName] || 0) + 1;
-    localStorage.setItem('appLaunches', JSON.stringify(launches));
-    
-    // Update stats
-    const tasksCompleted = parseInt(document.getElementById('tasksCompleted').textContent) + 1;
-    document.getElementById('tasksCompleted').textContent = tasksCompleted;
-    
-    // Show toast
-    showAchievement(`Đang mở ${appName}...`);
-    
-    // Open app
-    window.open(appUrl, '_blank');
+// ===== SEARCH FUNCTIONALITY =====
+
+/**
+ * Thiết lập chức năng tìm kiếm
+ */
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+
+    // Tìm kiếm khi gõ
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        
+        if (query === '') {
+            displayApps(userApps);
+            return;
+        }
+
+        // Lọc apps theo tên hoặc mô tả
+        const filtered = userApps.filter(app => 
+            app.name.toLowerCase().includes(query) ||
+            app.description.toLowerCase().includes(query)
+        );
+
+        displayApps(filtered);
+    });
+
+    // Keyboard shortcut Ctrl+K
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
 }
 
-// Load Activities
+// ===== QUICK ACTIONS =====
+
+/**
+ * Thiết lập các nút quick action
+ */
+function setupQuickActions() {
+    const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+    
+    quickActionBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const action = btn.dataset.action;
+            handleQuickAction(action);
+        });
+    });
+}
+
+/**
+ * Xử lý quick action
+ */
+function handleQuickAction(action) {
+    switch(action) {
+        case 'new-task':
+            showToast('Tính năng tạo nhiệm vụ đang phát triển', 'info');
+            break;
+        case 'scan-qr':
+            showToast('Tính năng quét QR đang phát triển', 'info');
+            break;
+        case 'report':
+            showToast('Tính năng báo cáo đang phát triển', 'info');
+            break;
+        case 'help':
+            window.open('https://support.cphaco.vn', '_blank');
+            break;
+        default:
+            console.log('Unknown action:', action);
+    }
+}
+
+// ===== VIEW TOGGLE =====
+
+/**
+ * Thiết lập toggle view (grid/list)
+ */
+function setupViewToggle() {
+    const viewBtns = document.querySelectorAll('.view-btn');
+    const appsGrid = document.getElementById('appsGrid');
+    if (!appsGrid) return;
+
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active from all
+            viewBtns.forEach(b => b.classList.remove('active'));
+            
+            // Add active to clicked
+            btn.classList.add('active');
+            
+            // Toggle view
+            const view = btn.dataset.view;
+            if (view === 'list') {
+                appsGrid.classList.add('list-view');
+            } else {
+                appsGrid.classList.remove('list-view');
+            }
+        });
+    });
+}
+
+// ===== NOTIFICATIONS =====
+
+/**
+ * Load notifications
+ */
+function loadNotifications() {
+    const notifications = [
+        {
+            id: 1,
+            title: 'Chào mừng đến với Cphaco.app',
+            message: 'Cảm ơn bạn đã sử dụng hệ thống quản lý của chúng tôi',
+            time: '5 phút trước',
+            unread: true,
+            icon: '👋',
+            color: '#0066FF'
+        },
+        {
+            id: 2,
+            title: 'Cập nhật hệ thống',
+            message: 'Hệ thống đã được cập nhật lên phiên bản mới',
+            time: '2 giờ trước',
+            unread: true,
+            icon: '🔄',
+            color: '#10b981'
+        },
+        {
+            id: 3,
+            title: 'Bảo trì định kỳ',
+            message: 'Hệ thống sẽ bảo trì vào 2h sáng ngày mai',
+            time: '1 ngày trước',
+            unread: false,
+            icon: '⚙️',
+            color: '#f59e0b'
+        }
+    ];
+
+    displayNotifications(notifications);
+}
+
+/**
+ * Hiển thị notifications
+ */
+function displayNotifications(notifications) {
+    const notificationList = document.getElementById('notificationList');
+    if (!notificationList) return;
+
+    if (notifications.length === 0) {
+        notificationList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🔔</div>
+                <h3 class="empty-state-title">Không có thông báo</h3>
+                <p class="empty-state-description">Bạn đã xem hết tất cả thông báo</p>
+            </div>
+        `;
+        return;
+    }
+
+    notificationList.innerHTML = notifications.map(notif => `
+        <div class="notification-item ${notif.unread ? 'unread' : ''}" data-id="${notif.id}">
+            <div style="display: flex; align-items: start; gap: 1rem;">
+                <div style="width: 40px; height: 40px; border-radius: 10px; 
+                            background: ${notif.color}20; display: flex; align-items: center; 
+                            justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                    ${notif.icon}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">
+                        ${notif.title}
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        ${notif.message}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-light);">
+                        ${notif.time}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * Thiết lập notification panel
+ */
+function setupNotifications() {
+    const notificationBtn = document.getElementById('notificationBtn');
+    const notificationPanel = document.getElementById('notificationPanel');
+    const closeNotifications = document.getElementById('closeNotifications');
+    const overlay = document.getElementById('overlay');
+
+    if (!notificationBtn || !notificationPanel) return;
+
+    // Open panel
+    notificationBtn.addEventListener('click', () => {
+        notificationPanel.classList.add('active');
+        overlay.classList.add('active');
+    });
+
+    // Close panel
+    closeNotifications.addEventListener('click', () => {
+        notificationPanel.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    // Close when click overlay
+    overlay.addEventListener('click', () => {
+        notificationPanel.classList.remove('active');
+        document.getElementById('userDropdown').classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    // Load notifications
+    loadNotifications();
+}
+
+// ===== USER MENU =====
+
+/**
+ * Thiết lập user menu dropdown
+ */
+function setupUserMenu() {
+    const userMenu = document.querySelector('.user-menu');
+    const userDropdown = document.getElementById('userDropdown');
+    const overlay = document.getElementById('overlay');
+
+    if (!userMenu || !userDropdown) return;
+
+    // Toggle dropdown
+    userMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isActive = userDropdown.classList.contains('active');
+        
+        // Close notification panel if open
+        document.getElementById('notificationPanel')?.classList.remove('active');
+        
+        // Toggle user dropdown
+        userDropdown.classList.toggle('active');
+        overlay.classList.toggle('active', !isActive);
+    });
+
+    // Logout handler
+    const logoutBtn = userDropdown.querySelector('.dropdown-item.danger');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                logout();
+            }
+        });
+    }
+}
+
+// ===== ACTIVITIES =====
+
+/**
+ * Load recent activities
+ */
 function loadActivities() {
     const activities = [
         {
+            icon: '📅',
+            color: 'linear-gradient(135deg, #667eea, #764ba2)',
+            title: 'Truy cập Đăng ký trực BQT',
+            description: 'Đã xem lịch trực tháng 11',
+            time: '10 phút trước'
+        },
+        {
+            icon: '🗺️',
+            color: 'linear-gradient(135deg, #f093fb, #f5576c)',
+            title: 'Cập nhật Bản đồ số',
+            description: 'Đã chỉnh sửa vị trí A-123',
+            time: '1 giờ trước'
+        },
+        {
+            icon: '🌸',
+            color: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+            title: 'Xem Khu chăm sóc',
+            description: 'Đã kiểm tra biên bản khu A',
+            time: '2 giờ trước'
+        },
+        {
             icon: '📊',
-            title: 'Xuất báo cáo thành công',
-            description: 'Báo cáo tháng 1/2025 đã được tạo',
-            time: '5 phút trước',
-            bgColor: 'linear-gradient(135deg, #667eea, #764ba2)'
-        },
-        {
-            icon: '✅',
-            title: 'Hoàn thành nhiệm vụ',
-            description: 'Cập nhật thông tin mộ phần khu A',
-            time: '1 giờ trước',
-            bgColor: 'linear-gradient(135deg, #f093fb, #f5576c)'
-        },
-        {
-            icon: '📝',
-            title: 'Đăng ký lịch trực',
-            description: 'Đã đăng ký ca trực ngày 10/01',
-            time: '3 giờ trước',
-            bgColor: 'linear-gradient(135deg, #4facfe, #00f2fe)'
-        },
-        {
-            icon: '⭐',
-            title: 'Nhận đánh giá 5 sao',
-            description: 'Từ khảo sát chất lượng dịch vụ',
-            time: 'Hôm qua',
-            bgColor: 'linear-gradient(135deg, #fa709a, #fee140)'
+            color: 'linear-gradient(135deg, #fa709a, #fee140)',
+            title: 'Khảo sát TPT',
+            description: 'Đã hoàn thành 5 khảo sát',
+            time: 'Hôm qua'
         }
     ];
-    
+
+    displayActivities(activities);
+}
+
+/**
+ * Hiển thị activities
+ */
+function displayActivities(activities) {
     const activityList = document.getElementById('activityList');
-    activityList.innerHTML = '';
-    
-    activities.forEach(activity => {
-        const activityItem = document.createElement('div');
-        activityItem.className = 'activity-item';
-        activityItem.innerHTML = `
-            <div class="activity-icon" style="background: ${activity.bgColor}; color: white;">
+    if (!activityList) return;
+
+    if (activities.length === 0) {
+        activityList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3 class="empty-state-title">Chưa có hoạt động</h3>
+                <p class="empty-state-description">Hoạt động của bạn sẽ được hiển thị ở đây</p>
+            </div>
+        `;
+        return;
+    }
+
+    activityList.innerHTML = activities.map(activity => `
+        <div class="activity-item fade-in">
+            <div class="activity-icon" style="background: ${activity.color};">
                 ${activity.icon}
             </div>
             <div class="activity-content">
@@ -284,224 +631,164 @@ function loadActivities() {
                 <div class="activity-description">${activity.description}</div>
             </div>
             <div class="activity-time">${activity.time}</div>
-        `;
-        activityList.appendChild(activityItem);
-    });
+        </div>
+    `).join('');
 }
 
-// Load Notifications
-function loadNotifications() {
-    const notifications = [
-        {
-            icon: '🔔',
-            title: 'Lịch trực mới',
-            text: 'Bạn có ca trực vào ngày mai lúc 8:00 AM',
-            time: '10 phút trước',
-            unread: true,
-            bgColor: 'linear-gradient(135deg, #667eea, #764ba2)'
-        },
-        {
-            icon: '📢',
-            title: 'Thông báo quan trọng',
-            text: 'Họp toàn thể vào 14:00 chiều nay',
-            time: '30 phút trước',
-            unread: true,
-            bgColor: 'linear-gradient(135deg, #f093fb, #f5576c)'
-        },
-        {
-            icon: '🎉',
-            title: 'Chúc mừng!',
-            text: 'Bạn đã hoàn thành 100 nhiệm vụ',
-            time: '2 giờ trước',
-            unread: true,
-            bgColor: 'linear-gradient(135deg, #fa709a, #fee140)'
-        },
-        {
-            icon: '💡',
-            title: 'Mẹo hữu ích',
-            text: 'Dùng Ctrl+K để tìm kiếm nhanh',
-            time: '1 ngày trước',
-            unread: false,
-            bgColor: 'linear-gradient(135deg, #4facfe, #00f2fe)'
+// ===== STATISTICS =====
+
+/**
+ * Load và hiển thị thống kê
+ */
+function loadStatistics() {
+    // Mock data - trong thực tế sẽ fetch từ API
+    const stats = {
+        tasksCompleted: Math.floor(Math.random() * 20) + 10,
+        productivity: Math.floor(Math.random() * 30) + 70,
+        streak: Math.floor(Math.random() * 10) + 5
+    };
+
+    // Cập nhật UI
+    const tasksElement = document.getElementById('tasksCompleted');
+    const productivityElement = document.getElementById('productivity');
+    const streakElement = document.getElementById('streak');
+
+    if (tasksElement) animateCounter(tasksElement, stats.tasksCompleted);
+    if (productivityElement) animateCounter(productivityElement, stats.productivity, '%');
+    if (streakElement) animateCounter(streakElement, stats.streak);
+}
+
+/**
+ * Animation cho counter
+ */
+function animateCounter(element, target, suffix = '') {
+    const duration = 1000;
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
         }
-    ];
-    
-    const notificationList = document.getElementById('notificationList');
-    notificationList.innerHTML = '';
-    
-    notifications.forEach(notif => {
-        const notifItem = document.createElement('div');
-        notifItem.className = `notification-item ${notif.unread ? 'unread' : ''}`;
-        notifItem.innerHTML = `
-            <div class="notification-item-icon" style="background: ${notif.bgColor}; color: white;">
-                ${notif.icon}
-            </div>
-            <div class="notification-item-content">
-                <div class="notification-item-title">${notif.title}</div>
-                <div class="notification-item-text">${notif.text}</div>
-                <div class="notification-item-time">${notif.time}</div>
-            </div>
-        `;
-        notificationList.appendChild(notifItem);
-    });
+        element.textContent = Math.floor(current) + suffix;
+    }, 16);
 }
 
-// Animate Stats
-function animateStats() {
-    const stats = [
-        { id: 'tasksCompleted', target: 12 },
-        { id: 'streak', target: 7 }
-    ];
-    
-    stats.forEach(stat => {
-        const element = document.getElementById(stat.id);
-        let current = 0;
-        const increment = stat.target / 20;
-        const timer = setInterval(() => {
-            current += increment;
-            if (current >= stat.target) {
-                element.textContent = stat.target;
-                clearInterval(timer);
-            } else {
-                element.textContent = Math.floor(current);
-            }
-        }, 50);
-    });
-}
+// ===== TOAST NOTIFICATIONS =====
 
-// Show Achievement Toast
-function showAchievement(text) {
+/**
+ * Hiển thị toast notification
+ */
+function showToast(message, type = 'info') {
     const toast = document.getElementById('achievementToast');
-    toast.querySelector('.achievement-text').textContent = text;
+    if (!toast) return;
+
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+
+    const titles = {
+        success: 'Thành công',
+        error: 'Lỗi',
+        warning: 'Cảnh báo',
+        info: 'Thông tin'
+    };
+
+    const iconElement = toast.querySelector('.achievement-icon');
+    const titleElement = toast.querySelector('.achievement-title');
+    const textElement = toast.querySelector('.achievement-text');
+
+    if (iconElement) iconElement.textContent = icons[type] || icons.info;
+    if (titleElement) titleElement.textContent = titles[type] || titles.info;
+    if (textElement) textElement.textContent = message;
+
     toast.classList.add('show');
-    
+
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
 }
 
-// Search Functionality
-const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    const appCards = document.querySelectorAll('.app-card');
-    
-    appCards.forEach(card => {
-        const title = card.querySelector('.app-card-title').textContent.toLowerCase();
-        const description = card.querySelector('.app-card-description').textContent.toLowerCase();
-        
-        if (title.includes(query) || description.includes(query)) {
-            card.style.display = 'flex';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-});
+// ===== PAGE LOAD ANIMATION =====
 
-// Keyboard Shortcuts
-document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + K for search
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        searchInput.focus();
-    }
-    
-    // Escape to clear search
-    if (e.key === 'Escape' && document.activeElement === searchInput) {
-        searchInput.value = '';
-        searchInput.blur();
-        loadApps(); // Reset apps display
-    }
-});
-
-// Notification Panel
-const notificationBtn = document.getElementById('notificationBtn');
-const notificationPanel = document.getElementById('notificationPanel');
-const closeNotifications = document.getElementById('closeNotifications');
-const overlay = document.getElementById('overlay');
-
-notificationBtn.addEventListener('click', () => {
-    notificationPanel.classList.add('active');
-    overlay.classList.add('active');
-});
-
-closeNotifications.addEventListener('click', () => {
-    notificationPanel.classList.remove('active');
-    overlay.classList.remove('active');
-});
-
-overlay.addEventListener('click', () => {
-    notificationPanel.classList.remove('active');
-    overlay.classList.remove('active');
-});
-
-// User Dropdown
-const userMenu = document.querySelector('.user-menu');
-const userDropdown = document.getElementById('userDropdown');
-
-userMenu.addEventListener('click', (e) => {
-    e.stopPropagation();
-    
-    // Close notification panel if open
-    notificationPanel.classList.remove('active');
-    overlay.classList.remove('active');
-    
-    // Toggle user dropdown (NO overlay needed)
-    userDropdown.classList.toggle('active');
-});
-
-// Close user dropdown when clicking outside
-document.addEventListener('click', (e) => {
-    if (!userMenu.contains(e.target) && !userDropdown.contains(e.target)) {
-        userDropdown.classList.remove('active');
-    }
-});
-
-// View Toggle
-const viewButtons = document.querySelectorAll('.view-btn');
-viewButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        viewButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        const view = btn.dataset.view;
-        const appsGrid = document.getElementById('appsGrid');
-        
-        if (view === 'list') {
-            appsGrid.style.gridTemplateColumns = '1fr';
-        } else {
-            appsGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
-        }
-    });
-});
-
-// Quick Actions
-const quickActionBtns = document.querySelectorAll('.quick-action-btn');
-quickActionBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const action = btn.dataset.action;
-        showAchievement(`Đang thực hiện: ${btn.textContent.trim()}`);
-    });
-});
-
-// Initialize on load
-window.addEventListener('load', () => {
-    initializeDashboard();
-    
-    // Page transition
+/**
+ * Animation khi load trang
+ */
+function pageLoadAnimation() {
     document.body.style.opacity = '0';
     setTimeout(() => {
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '1';
     }, 100);
-});
-
-// Service Worker (optional - for offline support)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-        // Service worker registration failed
-    });
 }
 
-console.log('🚀 Cphaco Dashboard loaded successfully!');
-console.log('💡 Tip: Press Ctrl+K to search apps');
+// ===== INITIALIZATION =====
+
+/**
+ * Khởi tạo tất cả chức năng khi DOM ready
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Cphaco Dashboard loading...');
+
+    // 1. Kiểm tra authentication
+    if (!checkAuth()) {
+        console.warn('❌ Not authenticated');
+        return;
+    }
+
+    console.log('✅ Authenticated:', currentUser);
+
+    // 2. Load user info
+    loadUserInfo();
+
+    // 3. Load user apps
+    loadUserApps();
+
+    // 4. Setup các chức năng
+    setupSearch();
+    setupQuickActions();
+    setupViewToggle();
+    setupNotifications();
+    setupUserMenu();
+    setupChangePasswordModal();
+
+    // 5. Load data
+    loadStatistics();
+    loadActivities();
+
+    // 6. Page animation
+    pageLoadAnimation();
+
+    // 7. Welcome message
+    setTimeout(() => {
+        showToast(`Chào mừng ${currentUser.name || currentUser.email}!`, 'success');
+    }, 500);
+
+    console.log('✅ Dashboard loaded successfully!');
+});
+
+// ===== ERROR HANDLING =====
+
+/**
+ * Global error handler
+ */
+window.addEventListener('error', (e) => {
+    console.error('Global error:', e.error);
+    showToast('Đã xảy ra lỗi. Vui lòng thử lại.', 'error');
+});
+
+/**
+ * Unhandled promise rejection handler
+ */
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled rejection:', e.reason);
+    showToast('Đã xảy ra lỗi. Vui lòng thử lại.', 'error');
+});
+
+console.log('📱 Dashboard.js loaded');

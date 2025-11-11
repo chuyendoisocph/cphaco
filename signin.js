@@ -1,69 +1,384 @@
-// Password Toggle
+// ========================================
+// SIGNIN.JS - CPHACO.APP (IMPROVED)
+// SSO Integration với OTP Authentication
+// ========================================
+
+// ===== SSO CONFIGURATION =====
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbwwOc00czKNL_R57w89sVCfnrBoRqEWBHmEBXsCeKni0aWhnHoqW3cIyzt4wwTsl6CSQQ/exec';
+const APP_ID = 'PORTAL'; // AppID trong sheet APPS
+const TOKEN_KEY = 'CP_AUTH_TOKEN';
+
+// ===== DOM ELEMENTS =====
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
-
-togglePassword.addEventListener('click', function() {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    
-    // Change icon (optional - can enhance with different SVG)
-    this.style.color = type === 'text' ? 'var(--primary-blue)' : 'var(--text-light)';
-});
-
-// Form Validation
 const signinForm = document.getElementById('signinForm');
 const emailInput = document.getElementById('email');
 const rememberCheckbox = document.getElementById('remember');
 
-// Email validation
+// ===== VALIDATION HELPERS =====
+
+/**
+ * Validate email format
+ */
 function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Show error message
+/**
+ * Hiển thị lỗi cho input
+ */
 function showError(input, message) {
-    // Remove existing error
     const existingError = input.parentElement.parentElement.querySelector('.error-message');
-    if (existingError) {
-        existingError.remove();
-    }
+    if (existingError) existingError.remove();
     
     input.classList.add('error');
     
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
     errorDiv.innerHTML = `⚠️ ${message}`;
+    
     input.parentElement.parentElement.appendChild(errorDiv);
 }
 
-// Remove error message
+/**
+ * Xóa lỗi của input
+ */
 function removeError(input) {
     input.classList.remove('error');
     const errorMessage = input.parentElement.parentElement.querySelector('.error-message');
-    if (errorMessage) {
-        errorMessage.remove();
+    if (errorMessage) errorMessage.remove();
+}
+
+/**
+ * Hiển thị thông báo thành công
+ */
+function showSuccessMessage(message = '✓ Đăng nhập thành công! Đang chuyển hướng...') {
+    const existingSuccess = document.querySelector('.success-message');
+    if (existingSuccess) existingSuccess.remove();
+    
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.textContent = message;
+    
+    const formHeader = document.querySelector('.form-header');
+    formHeader.insertAdjacentElement('afterend', successDiv);
+}
+
+// ===== PASSWORD TOGGLE =====
+
+if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.style.color = type === 'text' ? 'var(--primary-blue)' : 'var(--text-light)';
+    });
+}
+
+// ===== PASSWORD AUTHENTICATION FLOW =====
+
+/**
+ * Đăng nhập bằng email và password
+ */
+async function loginWithPassword({email, password, app, returnTo}) {
+    try {
+        const response = await fetch(AUTH_BASE, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: JSON.stringify({
+                action: 'login',
+                email: email,
+                password: password,
+                app: app,
+                returnTo: returnTo
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.ok) {
+            throw new Error(data.error || 'Email hoặc mật khẩu không đúng');
+        }
+        
+        // Lưu token vào localStorage
+        if (data.token) {
+            try {
+                localStorage.setItem(TOKEN_KEY, data.token);
+                
+                // Parse token để lưu thêm thông tin user
+                const userInfo = parseJWT(data.token);
+                localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
+                
+                console.log('✅ Login successful:', userInfo);
+                
+            } catch (e) {
+                console.error('Error saving token:', e);
+            }
+        }
+        
+        // Trả về URL redirect (mặc định là dashboard.html)
+        return data.redirect || returnTo || 'dashboard.html';
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        throw error;
     }
 }
 
-// Input validation on blur
+/**
+ * Parse JWT token (client-side, không verify signature)
+ */
+function parseJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
+            '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        ).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('Parse JWT error:', error);
+        return {};
+    }
+}
+
+/**
+ * Verify 2FA code
+ */
+async function verify2FA({email, code, tempToken, app, returnTo}) {
+    try {
+        const response = await fetch(AUTH_BASE, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: JSON.stringify({
+                action: 'verify-2fa',
+                email: email,
+                code: code,
+                tempToken: tempToken,
+                app: app,
+                returnTo: returnTo
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.ok) {
+            throw new Error(data.error || 'Mã 2FA không chính xác');
+        }
+        
+        console.log('✅ 2FA verification successful');
+        
+        return data;
+        
+    } catch (error) {
+        console.error('2FA verification error:', error);
+        throw error;
+    }
+}
+
+// ===== FORM SUBMISSION =====
+
+signinForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Remove previous errors
+    removeError(emailInput);
+    removeError(passwordInput);
+    
+    // Validate email
+    let isValid = true;
+    
+    if (!emailInput.value) {
+        showError(emailInput, 'Vui lòng nhập email');
+        isValid = false;
+    } else if (!validateEmail(emailInput.value)) {
+        showError(emailInput, 'Email không hợp lệ');
+        isValid = false;
+    }
+    
+    // Validate password
+    if (!passwordInput.value) {
+        showError(passwordInput, 'Vui lòng nhập mật khẩu');
+        isValid = false;
+    } else if (passwordInput.value.length < 6) {
+        showError(passwordInput, 'Mật khẩu phải có ít nhất 6 ký tự');
+        isValid = false;
+    }
+    
+    if (!isValid) return;
+    
+    // Get submit button
+    const submitButton = this.querySelector('.submit-button');
+    const originalText = submitButton.innerHTML;
+    
+    // Show loading state
+    submitButton.classList.add('loading');
+    submitButton.innerHTML = '<span>Đang đăng nhập…</span>';
+    submitButton.disabled = true;
+    
+    // Get returnTo URL
+    const urlParams = new URLSearchParams(location.search);
+    const returnTo = urlParams.get('returnTo') || 'dashboard.html';
+    
+    let redirectUrl = returnTo; // Declare outside try block
+    
+    try {
+        console.log('Logging in with:', emailInput.value);
+        
+        // Login with password
+        const loginResponse = await loginWithPassword({
+            email: emailInput.value,
+            password: passwordInput.value,
+            app: APP_ID,
+            returnTo: returnTo
+        });
+        
+        // Check if 2FA is required
+        if (loginResponse.requires2FA) {
+            // Show 2FA prompt
+            submitButton.innerHTML = '<span>Nhập mã 2FA...</span>';
+            
+            const twoFACode = prompt('Nhập mã 2FA từ ứng dụng Authenticator (6 chữ số):');
+            
+            if (!twoFACode) {
+                throw new Error('Bạn chưa nhập mã 2FA');
+            }
+            
+            if (!/^\d{6}$/.test(twoFACode)) {
+                throw new Error('Mã 2FA phải là 6 chữ số');
+            }
+            
+            submitButton.innerHTML = '<span>Đang xác thực 2FA...</span>';
+            
+            // Verify 2FA
+            const verify2FAResponse = await verify2FA({
+                email: emailInput.value,
+                code: twoFACode,
+                tempToken: loginResponse.tempToken,
+                app: APP_ID,
+                returnTo: returnTo
+            });
+            
+            // Save token from 2FA verification
+            if (verify2FAResponse.token) {
+                localStorage.setItem(TOKEN_KEY, verify2FAResponse.token);
+                const userInfo = parseJWT(verify2FAResponse.token);
+                localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
+            }
+            
+            redirectUrl = verify2FAResponse.redirect || returnTo;
+        } else {
+            // No 2FA required - response is the redirect URL string
+            redirectUrl = loginResponse || returnTo;
+        }
+        
+        // Remember email if checkbox is checked
+        if (rememberCheckbox && rememberCheckbox.checked) {
+            localStorage.setItem('rememberedEmail', emailInput.value);
+        } else {
+            localStorage.removeItem('rememberedEmail');
+        }
+        
+        // Show success message
+        showSuccessMessage();
+        submitButton.innerHTML = '<span>✓ Thành công!</span>';
+        
+        // Redirect after 1 second
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Authentication error:', error);
+        
+        // Reset button
+        submitButton.classList.remove('loading');
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+        
+        // Show error
+        const errorMessage = error.message || 'Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.';
+        showError(passwordInput, errorMessage);
+        
+        // Shake animation for error
+        signinForm.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+            signinForm.style.animation = '';
+        }, 500);
+    }
+});
+
+// Add shake animation CSS
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+`;
+document.head.appendChild(shakeStyle);
+
+// ===== AUTO-FILL REMEMBERED EMAIL =====
+
+window.addEventListener('load', function() {
+    // Load remembered email
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail) {
+        emailInput.value = rememberedEmail;
+        if (rememberCheckbox) {
+            rememberCheckbox.checked = true;
+        }
+    }
+    
+    // Check if already logged in
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+        try {
+            const payload = parseJWT(token);
+            
+            // Check if token is still valid
+            if (payload.exp && payload.exp * 1000 > Date.now()) {
+                console.log('Already authenticated, redirecting...');
+                
+                const urlParams = new URLSearchParams(location.search);
+                const returnTo = urlParams.get('returnTo') || 'dashboard.html';
+                
+                window.location.href = returnTo;
+                return;
+            } else {
+                // Token expired, remove it
+                localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem('CP_USER_INFO');
+            }
+        } catch (e) {
+            console.error('Invalid token:', e);
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem('CP_USER_INFO');
+        }
+    }
+    
+    // Page fade-in animation
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = '1';
+    }, 100);
+});
+
+// ===== INPUT VALIDATION ON BLUR =====
+
 emailInput.addEventListener('blur', function() {
     if (this.value && !validateEmail(this.value)) {
-        showError(this, 'Vui lòng nhập email hợp lệ');
+        showError(this, 'Email không hợp lệ');
     } else {
         removeError(this);
     }
 });
 
-passwordInput.addEventListener('blur', function() {
-    if (this.value && this.value.length < 6) {
-        showError(this, 'Mật khẩu phải có ít nhất 6 ký tự');
-    } else {
-        removeError(this);
-    }
-});
-
-// Clear error on input
 emailInput.addEventListener('input', function() {
     if (this.classList.contains('error')) {
         removeError(this);
@@ -76,170 +391,11 @@ passwordInput.addEventListener('input', function() {
     }
 });
 
-// Form Submit
-signinForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Validate
-    let isValid = true;
-    
-    if (!emailInput.value) {
-        showError(emailInput, 'Vui lòng nhập email');
-        isValid = false;
-    } else if (!validateEmail(emailInput.value)) {
-        showError(emailInput, 'Email không hợp lệ');
-        isValid = false;
-    }
-    
-    if (!passwordInput.value) {
-        showError(passwordInput, 'Vui lòng nhập mật khẩu');
-        isValid = false;
-    } else if (passwordInput.value.length < 6) {
-        showError(passwordInput, 'Mật khẩu phải có ít nhất 6 ký tự');
-        isValid = false;
-    }
-    
-    if (!isValid) return;
-    
-    // Show loading state
-    const submitButton = this.querySelector('.submit-button');
-    const originalText = submitButton.innerHTML;
-    submitButton.classList.add('loading');
-    submitButton.innerHTML = '<span>Đang đăng nhập...</span>';
-    
-    // Simulate API call (replace with actual authentication)
-    try {
-        await simulateLogin(emailInput.value, passwordInput.value, rememberCheckbox.checked);
-        
-        // Success
-        showSuccessMessage();
-        
-        // Redirect after 1.5 seconds
-        setTimeout(() => {
-            // 🎯 THAY ĐỔI: Redirect đến dashboard thay vì index.html
-            window.location.href = 'dashboard.html';
-        }, 1500);
-        
-    } catch (error) {
-        // Error
-        submitButton.classList.remove('loading');
-        submitButton.innerHTML = originalText;
-        
-        showError(passwordInput, error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-    }
-});
+// ===== VISUAL ENHANCEMENTS =====
 
-// Simulate login (replace with actual API call)
-function simulateLogin(email, password, remember) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // Demo: accept any email/password for testing
-            // In production, replace with actual authentication
-            if (email && password) {
-                // 🎯 THAY ĐỔI: Lưu thông tin user để dashboard sử dụng
-                // Extract first name from email (before @ and before .)
-                const emailPart = email.split('@')[0];
-                const firstName = emailPart.split('.')[0];
-                const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
-                
-                // Save user info to localStorage
-                localStorage.setItem('userName', capitalizedName);
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('loginTime', new Date().toISOString());
-                
-                // Save to localStorage if remember is checked
-                if (remember) {
-                    localStorage.setItem('rememberedEmail', email);
-                } else {
-                    localStorage.removeItem('rememberedEmail');
-                }
-                
-                resolve({ success: true });
-            } else {
-                reject({ message: 'Email hoặc mật khẩu không đúng' });
-            }
-        }, 1500);
-    });
-}
-
-// Show success message
-function showSuccessMessage() {
-    // Remove existing success message
-    const existingSuccess = document.querySelector('.success-message');
-    if (existingSuccess) {
-        existingSuccess.remove();
-    }
-    
-    const successDiv = document.createElement('div');
-    successDiv.className = 'success-message';
-    successDiv.textContent = '✓ Đăng nhập thành công! Đang chuyển hướng...';
-    
-    const formHeader = document.querySelector('.form-header');
-    formHeader.insertAdjacentElement('afterend', successDiv);
-}
-
-// Load remembered email
-window.addEventListener('load', function() {
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
-    if (rememberedEmail) {
-        emailInput.value = rememberedEmail;
-        rememberCheckbox.checked = true;
-    }
-});
-
-// Social Login Handlers
-const googleButton = document.querySelector('.google-button');
-const microsoftButton = document.querySelector('.microsoft-button');
-
-googleButton.addEventListener('click', function() {
-    handleSocialLogin('Google');
-});
-
-microsoftButton.addEventListener('click', function() {
-    handleSocialLogin('Microsoft');
-});
-
-function handleSocialLogin(provider) {
-    // Show loading
-    const button = event.currentTarget;
-    const originalText = button.innerHTML;
-    button.style.opacity = '0.7';
-    button.style.pointerEvents = 'none';
-    button.innerHTML = `<span>Đang kết nối với ${provider}...</span>`;
-    
-    // Simulate social login (replace with actual OAuth implementation)
-    setTimeout(() => {
-        button.style.opacity = '1';
-        button.style.pointerEvents = 'auto';
-        button.innerHTML = originalText;
-        
-        // In production, implement actual OAuth flow
-        alert(`Đăng nhập với ${provider} sẽ được triển khai trong phiên bản production.`);
-    }, 1000);
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // ESC to clear form
-    if (e.key === 'Escape') {
-        emailInput.value = '';
-        passwordInput.value = '';
-        removeError(emailInput);
-        removeError(passwordInput);
-    }
-});
-
-// Add smooth transitions on load
-window.addEventListener('load', function() {
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-        document.body.style.transition = 'opacity 0.5s ease';
-        document.body.style.opacity = '1';
-    }, 100);
-});
-
-// Parallax effect for background orbs
+/**
+ * Parallax effect cho gradient orbs
+ */
 window.addEventListener('scroll', () => {
     const scrolled = window.pageYOffset;
     const orbs = document.querySelectorAll('.gradient-orb');
@@ -250,71 +406,120 @@ window.addEventListener('scroll', () => {
     });
 });
 
-// Form input animations
-const inputs = document.querySelectorAll('.form-input');
-
-inputs.forEach(input => {
-    input.addEventListener('focus', function() {
-        this.parentElement.style.transform = 'scale(1.01)';
-        this.parentElement.style.transition = 'transform 0.2s ease';
+/**
+ * Ripple effect cho buttons
+ */
+(function setupRippleEffect() {
+    const buttons = document.querySelectorAll('.submit-button, .social-button');
+    
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
     });
     
-    input.addEventListener('blur', function() {
-        this.parentElement.style.transform = 'scale(1)';
-    });
-});
-
-// Add ripple effect to buttons
-const buttons = document.querySelectorAll('.submit-button, .social-button');
-
-buttons.forEach(button => {
-    button.addEventListener('click', function(e) {
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.classList.add('ripple');
-        
-        this.appendChild(ripple);
-        
-        setTimeout(() => {
-            ripple.remove();
-        }, 600);
-    });
-});
-
-// Add ripple animation styles dynamically
-const style = document.createElement('style');
-style.textContent = `
-    .submit-button, .social-button {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.5);
-        transform: scale(0);
-        animation: ripple-animation 0.6s ease-out;
-        pointer-events: none;
-    }
-    
-    @keyframes ripple-animation {
-        to {
-            transform: scale(4);
-            opacity: 0;
+    // Add ripple animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .submit-button, .social-button { 
+            position: relative; 
+            overflow: hidden; 
         }
-    }
-`;
-document.head.appendChild(style);
+        .ripple { 
+            position: absolute; 
+            border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0); 
+            animation: ripple-animation 0.6s ease-out; 
+            pointer-events: none; 
+        }
+        @keyframes ripple-animation { 
+            to { 
+                transform: scale(4); 
+                opacity: 0; 
+            } 
+        }
+    `;
+    document.head.appendChild(style);
+})();
 
-// Console message
-console.log('🔐 Cphaco.app Sign In loaded successfully!');
-console.log('🔧 Demo mode: Any email/password will work for testing');
-console.log('🎯 Will redirect to dashboard.html after successful login');
+// ===== SOCIAL LOGIN HANDLERS =====
+
+const googleButton = document.querySelector('.google-button');
+const microsoftButton = document.querySelector('.microsoft-button');
+
+if (googleButton) {
+    googleButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        handleSocialLogin('Google');
+    });
+}
+
+if (microsoftButton) {
+    microsoftButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        handleSocialLogin('Microsoft');
+    });
+}
+
+/**
+ * Handle social login (placeholder)
+ */
+function handleSocialLogin(provider) {
+    const button = event.currentTarget;
+    const originalText = button.innerHTML;
+    
+    button.style.opacity = '0.7';
+    button.style.pointerEvents = 'none';
+    button.innerHTML = `<span>Đang kết nối với ${provider}...</span>`;
+    
+    setTimeout(() => {
+        button.style.opacity = '1';
+        button.style.pointerEvents = 'auto';
+        button.innerHTML = originalText;
+        
+        alert(`Đăng nhập với ${provider} sẽ được triển khai trong phiên bản production.`);
+    }, 1000);
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+
+document.addEventListener('keydown', function(e) {
+    // ESC to clear form
+    if (e.key === 'Escape') {
+        emailInput.value = '';
+        passwordInput.value = '';
+        if (rememberCheckbox) rememberCheckbox.checked = false;
+        
+        removeError(emailInput);
+        removeError(passwordInput);
+    }
+    
+    // Ctrl+Enter to submit
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        signinForm.dispatchEvent(new Event('submit'));
+    }
+});
+
+// ===== ERROR HANDLING =====
+
+window.addEventListener('error', (e) => {
+    console.error('Global error:', e.error);
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled rejection:', e.reason);
+});
+
+console.log('🔐 Signin.js loaded - Password Authentication Mode');
