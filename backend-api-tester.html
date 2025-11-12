@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend API Tester - CPHACO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.1);
+        }
+
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .section {
+            background: #1e1e1e;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #ffff00;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #00aaff;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .button {
+            background: #00ff00;
+            color: #1e1e1e;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px 10px 0;
+            transition: all 0.3s;
+        }
+
+        .button:hover {
+            background: #00cc00;
+            transform: scale(1.05);
+        }
+
+        .button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .button.secondary {
+            background: #00aaff;
+        }
+
+        .button.secondary:hover {
+            background: #0088cc;
+        }
+
+        .log {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 3px 0;
+        }
+
+        .log-entry.error {
+            color: #ff0000;
+        }
+
+        .log-entry.warning {
+            color: #ffaa00;
+        }
+
+        .log-entry.success {
+            color: #00ff00;
+        }
+
+        .log-entry.info {
+            color: #00aaff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-badge.ok {
+            background: #00ff00;
+            color: #1e1e1e;
+        }
+
+        .status-badge.error {
+            background: #ff0000;
+            color: white;
+        }
+
+        pre {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex > * {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Backend API Tester</h1>
+
+        <div class="section">
+            <div class="section-title">⚙️ Configuration</div>
+            <div class="input-group">
+                <label>Backend URL:</label>
+                <input type="text" id="backendUrl" value="https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🧪 Test update-profile API</div>
+            
+            <div class="flex">
+                <div class="input-group">
+                    <label>Email:</label>
+                    <input type="email" id="testEmail" value="test@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Name:</label>
+                    <input type="text" id="testName" value="Test User">
+                </div>
+            </div>
+
+            <div class="flex">
+                <div class="input-group">
+                    <label>Phone:</label>
+                    <input type="text" id="testPhone" value="0901234567">
+                </div>
+                <div class="input-group">
+                    <label>Birth Date:</label>
+                    <input type="date" id="testBirthDate" value="1990-01-01">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Address:</label>
+                <input type="text" id="testAddress" value="123 Test Street">
+            </div>
+
+            <div class="input-group">
+                <label>Bio:</label>
+                <textarea id="testBio">This is a test bio</textarea>
+            </div>
+
+            <button class="button" id="testUpdateBtn" onclick="testUpdateProfile()">▶️ Test Update Profile</button>
+            <button class="button secondary" id="testGetBtn" onclick="testGetProfile()">📥 Test Get Profile</button>
+            <button class="button secondary" onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📊 Test Results</div>
+            <div class="log" id="testLog"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔍 Raw Response</div>
+            <pre id="rawResponse">Chưa có response...</pre>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('testLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString('vi-VN');
+            const icon = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            }[type] || 'ℹ';
+            
+            entry.textContent = `[${timestamp}] ${icon} ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+            document.getElementById('rawResponse').textContent = 'Chưa có response...';
+            log('Log cleared', 'info');
+        }
+
+        async function testUpdateProfile() {
+            const btn = document.getElementById('testUpdateBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Testing...';
+
+            log('=== TEST UPDATE PROFILE ===', 'info');
+            
+            const backendUrl = document.getElementById('backendUrl').value;
+            const profileData = {
+                action: 'update-profile',
+                email: document.getElementById('testEmail').value,
+                name: document.getElementById('testName').value,
+                phone: document.getElementById('testPhone').value,
+                birthDate: document.getElementById('testBirthDate').value,
+                address: document.getElementById('testAddress').value,
+                bio: document.getElementById('testBio').value,
+                avatar: 'https://i.pravatar.cc/200?img=12'
+            };
+
+            log(`📤 Request URL: ${backendUrl}`, 'info');
+            log(`📤 Request data:`, 'info');
+            Object.entries(profileData).forEach(([key, value]) => {
+                if (key !== 'avatar') {
+                    log(`   ${key}: ${value}`, 'info');
+                } else {
+                    log(`   ${key}: ${value.substring(0, 50)}...`, 'info');
+                }
+            });
+
+            try {
+                const startTime = Date.now();
+                
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(profileData)
+                });
+
+                const duration = Date.now() - startTime;
+
+                log(`📥 Response received in ${duration}ms`, 'success');
+                log(`📥 Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                log('📥 Headers:', 'info');
+                [...response.headers.entries()].forEach(([key, value]) => {
+                    log(`   ${key}: ${value}`, 'info');
+                });
+
+                const responseText = await response.text();
+                
+                log('📄 Response text length: ' + responseText.length + ' chars', 'info');
+                
+                document.getElementById('rawResponse').textContent = responseText;
+
+                try {
+                    const result = JSON.parse(responseText);
+                    log('✓ Response is valid JSON', 'success');
+                    log('📊 Parsed result:', 'info');
+                    log(JSON.stringify(result, null, 2), 'info');
+
+                    if (result.ok) {
+                        log('✅ Backend returned OK=true', 'success');
+                    } else {
+                        log('❌ Backend returned OK=false', 'error');
+                        if (result.error) {
+                            log(`Error: ${result.error}`, 'error');
+                        }
+                        if (result.message) {
+                            log(`Message: ${result.message}`, 'warning');
+                        }
+                    }
+                } catch (jsonError) {
+                    log('❌ Response is not valid JSON', 'error');
+                    log('JSON Parse Error: ' + jsonError.message, 'error');
+                    log('First 200 chars of response:', 'warning');
+                    log(responseText.substring(0, 200), 'warning');
+                }
+
+            } catch (error) {
+                log('❌ Fetch error: ' + error.message, 'error');
+                log('Error details: ' + error.toString(), 'error');
+                
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    log('⚠️ Possible causes:', 'warning');
+                    log('   - CORS policy blocking the request', 'warning');
+                    log('   - Backend URL is incorrect', 'warning');
+                    log('   - Backend is down or not responding', 'warning');
+                    log('   - Network connectivity issue', 'warning');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '▶️ Test Update Profile';
+            }
+        }
+
+        async function testGetProfile() {
+            const btn = document.getElementById('testGetBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Testing...';
+
+            log('=== TEST GET PROFILE ===', 'info');
+            
+            const backendUrl = document.getElementById('backendUrl').value;
+            const email = document.getElementById('testEmail').value;
+            const url = `${backendUrl}?action=get-profile&email=${encodeURIComponent(email)}`;
+
+            log(`📤 GET Request URL: ${url}`, 'info');
+
+            try {
+                const startTime = Date.now();
+                
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+
+                const duration = Date.now() - startTime;
+
+                log(`📥 Response received in ${duration}ms`, 'success');
+                log(`📥 Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+
+                const responseText = await response.text();
+                
+                document.getElementById('rawResponse').textContent = responseText;
+
+                try {
+                    const result = JSON.parse(responseText);
+                    log('✓ Response is valid JSON', 'success');
+                    log('📊 Parsed result:', 'info');
+                    log(JSON.stringify(result, null, 2), 'info');
+
+                    if (result.ok) {
+                        log('✅ Backend returned OK=true', 'success');
+                        if (result.profile) {
+                            log('Profile data found:', 'success');
+                            Object.entries(result.profile).forEach(([key, value]) => {
+                                log(`   ${key}: ${value}`, 'info');
+                            });
+                        }
+                    } else {
+                        log('❌ Backend returned OK=false', 'error');
+                    }
+                } catch (jsonError) {
+                    log('❌ Response is not valid JSON', 'error');
+                    log('First 200 chars: ' + responseText.substring(0, 200), 'warning');
+                }
+
+            } catch (error) {
+                log('❌ Fetch error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 Test Get Profile';
+            }
+        }
+
+        // Auto log on page load
+        window.addEventListener('load', () => {
+            log('Backend API Tester loaded', 'success');
+            log('Ready to test!', 'info');
+        });
+    </script>
+</body>
+</html>

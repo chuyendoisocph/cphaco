@@ -7,6 +7,83 @@
 const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec';
 const TOKEN_KEY = 'CP_AUTH_TOKEN';
 
+// ===== LOADING SCREEN =====
+
+/**
+ * Simulate loading progress
+ */
+function simulateLoading() {
+    const progressFill = document.getElementById('progressFill');
+    const loadingPercentage = document.getElementById('loadingPercentage');
+    
+    if (!progressFill || !loadingPercentage) return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        // Tăng progress với tốc độ ngẫu nhiên
+        progress += Math.random() * 15;
+        
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+        }
+        
+        // Cập nhật UI
+        progressFill.style.width = progress + '%';
+        loadingPercentage.textContent = Math.floor(progress) + '%';
+    }, 200);
+
+    return interval;
+}
+
+/**
+ * Hide loading screen
+ */
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const progressFill = document.getElementById('progressFill');
+    const loadingPercentage = document.getElementById('loadingPercentage');
+    
+    if (!loadingScreen) return;
+
+    // Đảm bảo progress bar đã hoàn thành
+    if (progressFill) progressFill.style.width = '100%';
+    if (loadingPercentage) loadingPercentage.textContent = '100%';
+
+    // Đợi một chút để user thấy 100%
+    setTimeout(() => {
+        loadingScreen.classList.add('loaded');
+        
+        // Remove khỏi DOM sau khi animation hoàn tất
+        setTimeout(() => {
+            loadingScreen.remove();
+        }, 500);
+    }, 300);
+}
+
+/**
+ * Initialize loading screen
+ */
+function initLoadingScreen() {
+    // Bắt đầu simulate loading
+    const loadingInterval = simulateLoading();
+    
+    // Đợi cho các resources load xong
+    window.addEventListener('load', () => {
+        // Clear interval nếu còn chạy
+        if (loadingInterval) clearInterval(loadingInterval);
+        
+        // Hide loading screen
+        setTimeout(() => {
+            hideLoadingScreen();
+        }, 500);
+    });
+}
+
+// Khởi tạo loading screen ngay khi script chạy
+initLoadingScreen();
+
+
 // ===== APPS DATABASE (định nghĩa sẵn các app có trong hệ thống) =====
 const APPS_DATABASE = {
     'BQT001': {

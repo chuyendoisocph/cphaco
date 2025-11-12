@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ - Cphaco.app</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="description" content="Quản lý hồ sơ cá nhân - Cphaco.app">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="dashboard.html" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Quay lại Dashboard
+                </a>
+            </div>
+            
+            <div class="nav-right">
+                <div class="user-menu">
+                    <img src="https://i.pravatar.cc/100?img=12" alt="User Avatar" class="user-avatar" id="navAvatar">
+                    <div class="user-info">
+                        <div class="user-name" id="navUserName">Nguyễn Văn A</div>
+                        <div class="user-role" id="navUserRole">Nhân viên</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="profile-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Hồ sơ cá nhân</h1>
+                <p class="page-description">Quản lý thông tin và ảnh đại diện của bạn</p>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- Left Side - Avatar -->
+                <div class="profile-sidebar">
+                    <div class="avatar-section">
+                        <div class="avatar-wrapper">
+                            <img src="https://i.pravatar.cc/200?img=12" alt="Avatar" class="profile-avatar" id="profileAvatar">
+                            <div class="avatar-overlay">
+                                <label for="avatarInput" class="avatar-upload-btn">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                    <span>Đổi ảnh</span>
+                                </label>
+                                <input type="file" id="avatarInput" accept="image/*" hidden>
+                            </div>
+                        </div>
+                        
+                        <div class="avatar-actions">
+                            <button class="btn-secondary" id="removeAvatarBtn">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z"></path>
+                                </svg>
+                                Xóa ảnh
+                            </button>
+                        </div>
+
+                        <div class="avatar-info">
+                            <p class="info-text">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M8 11V8M8 5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                JPG, PNG hoặc GIF. Tối đa 5MB.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="profile-stats">
+                        <h3 class="stats-title">Thống kê</h3>
+                        <div class="stat-item">
+                            <span class="stat-label">Ngày tham gia</span>
+                            <span class="stat-value" id="joinDate">15/01/2024</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Đăng nhập lần cuối</span>
+                            <span class="stat-value" id="lastLogin">12/11/2024</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ứng dụng truy cập</span>
+                            <span class="stat-value" id="appsCount">8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Profile Form -->
+                <div class="profile-main">
+                    <form class="profile-form" id="profileForm">
+                        <!-- Personal Information -->
+                        <div class="form-section">
+                            <h2 class="section-title">Thông tin cá nhân</h2>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="fullName" class="form-label">
+                                        Họ và tên
+                                        <span class="required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="fullName" 
+                                        class="form-input" 
+                                        placeholder="Nguyễn Văn A"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email" class="form-label">
+                                        Email
+                                        <span class="badge-readonly">Chỉ đọc</span>
+                                    </label>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        class="form-input" 
+                                        placeholder="email@example.com"
+                                        readonly
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">Số điện thoại</label>
+                                    <input 
+                                        type="tel" 
+                                        id="phone" 
+                                        class="form-input" 
+                                        placeholder="0912 345 678"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="birthDate" class="form-label">Ngày sinh</label>
+                                    <input 
+                                        type="date" 
+                                        id="birthDate" 
+                                        class="form-input"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address" class="form-label">Địa chỉ</label>
+                                <input 
+                                    type="text" 
+                                    id="address" 
+                                    class="form-input" 
+                                    placeholder="123 Đường ABC, Quận XYZ, TP.HCM"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Work Information -->
+                        <div class="form-section">
+                            <h2 class="section-title">Thông tin công việc</h2>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="role" class="form-label">
+                                        Chức vụ
+                                        <span class="badge-readonly">Chỉ đọc</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="role" 
+                                        class="form-input" 
+                                        placeholder="Nhân viên"
+                                        readonly
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="branch" class="form-label">
+                                        Chi nhánh
+                                        <span class="badge-readonly">Chỉ đọc</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="branch" 
+                                        class="form-input" 
+                                        placeholder="Chi nhánh Hà Nội"
+                                        readonly
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="department" class="form-label">
+                                    Phòng ban
+                                    <span class="badge-readonly">Chỉ đọc</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="department" 
+                                    class="form-input" 
+                                    placeholder="Phòng Kinh doanh"
+                                    readonly
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="form-section">
+                            <h2 class="section-title">Giới thiệu</h2>
+                            
+                            <div class="form-group">
+                                <label for="bio" class="form-label">
+                                    Về bạn
+                                    <span class="char-count">
+                                        <span id="bioCount">0</span>/500
+                                    </span>
+                                </label>
+                                <textarea 
+                                    id="bio" 
+                                    class="form-textarea" 
+                                    rows="4"
+                                    maxlength="500"
+                                    placeholder="Viết vài dòng giới thiệu về bản thân..."
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancelBtn">
+                                Hủy
+                            </button>
+                            <button type="submit" class="btn-primary" id="saveBtn">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13.333 14H2.667A1.333 1.333 0 0 1 1.333 12.667V3.333A1.333 1.333 0 0 1 2.667 2h8L14 5.333v7.334A1.333 1.333 0 0 1 13.333 14Z"></path>
+                                    <path d="M11.333 14v-5.333H4.667V14M4.667 2v3.333h6"></path>
+                                </svg>
+                                Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Image Crop Modal -->
+    <div class="modal" id="cropModal">
+        <div class="modal-content crop-modal">
+            <div class="modal-header">
+                <h3>Cắt ảnh đại diện</h3>
+                <button class="close-btn" id="closeCropModal">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="crop-container">
+                    <img id="cropImage" src="" alt="Crop">
+                </div>
+                <div class="crop-controls">
+                    <button type="button" class="control-btn" id="rotateLeftBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M2.5 10A7.5 7.5 0 0 1 17.5 10M17.5 10L14.167 6.667M17.5 10l-3.333 3.333"></path>
+                        </svg>
+                        Xoay trái
+                    </button>
+                    <button type="button" class="control-btn" id="rotateRightBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M17.5 10A7.5 7.5 0 0 0 2.5 10M2.5 10l3.333-3.333M2.5 10l3.333 3.333"></path>
+                        </svg>
+                        Xoay phải
+                    </button>
+                    <button type="button" class="control-btn" id="flipBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M5 2.5v15M5 2.5l3.333 3.333M5 2.5L1.667 5.833M15 2.5v15M15 2.5l3.333 3.333M15 2.5l-3.333 3.333"></path>
+                        </svg>
+                        Lật ngang
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelCropBtn">
+                    Hủy
+                </button>
+                <button type="button" class="btn-primary" id="applyCropBtn">
+                    Áp dụng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Success Toast -->
+    <div class="toast success-toast" id="successToast">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="9" fill="#10b981"/>
+            <path d="M6 10l2.5 2.5L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="toastMessage">Cập nhật thành công!</span>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>

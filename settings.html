@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt - Cphaco.app</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="description" content="Cài đặt ứng dụng - Cphaco.app">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="profile.css">
+    <style>
+        /* Settings specific styles */
+        .settings-container {
+            max-width: 900px;
+        }
+        
+        .settings-nav {
+            background: white;
+            border-radius: 16px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .settings-nav-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 0.875rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .settings-nav-btn:hover {
+            background: #f3f4f6;
+            color: #333;
+        }
+        
+        .settings-nav-btn.active {
+            background: linear-gradient(135deg, #0066FF, #00C9FF);
+            color: white;
+        }
+        
+        .settings-section {
+            display: none;
+        }
+        
+        .settings-section.active {
+            display: block;
+        }
+        
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-info {
+            flex: 1;
+        }
+        
+        .setting-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0 0 0.25rem;
+        }
+        
+        .setting-description {
+            font-size: 0.875rem;
+            color: #666;
+            margin: 0;
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: #e5e7eb;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        .toggle-switch.active {
+            background: #10b981;
+        }
+        
+        .toggle-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active .toggle-thumb {
+            transform: translateX(20px);
+        }
+        
+        /* Select Dropdown */
+        .setting-select {
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            font-size: 0.9375rem;
+            color: #1a1a1a;
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            min-width: 150px;
+        }
+        
+        .setting-select:focus {
+            outline: none;
+            border-color: #0066FF;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        /* Danger Zone */
+        .danger-zone {
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .danger-zone-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #dc2626;
+            margin: 0 0 0.5rem;
+        }
+        
+        .danger-zone-description {
+            font-size: 0.875rem;
+            color: #991b1b;
+            margin: 0 0 1rem;
+        }
+        
+        .btn-danger {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: white;
+            background: #dc2626;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="dashboard.html" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Quay lại Dashboard
+                </a>
+            </div>
+            
+            <div class="nav-right">
+                <div class="user-menu">
+                    <img src="https://i.pravatar.cc/100?img=12" alt="User Avatar" class="user-avatar">
+                    <div class="user-info">
+                        <div class="user-name" id="navUserName">Nguyễn Văn A</div>
+                        <div class="user-role">Nhân viên</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="profile-container settings-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Cài đặt</h1>
+                <p class="page-description">Tùy chỉnh trải nghiệm của bạn</p>
+            </div>
+
+            <!-- Settings Navigation -->
+            <div class="settings-nav">
+                <button class="settings-nav-btn active" data-section="general">
+                    Chung
+                </button>
+                <button class="settings-nav-btn" data-section="notifications">
+                    Thông báo
+                </button>
+                <button class="settings-nav-btn" data-section="security">
+                    Bảo mật
+                </button>
+                <button class="settings-nav-btn" data-section="appearance">
+                    Giao diện
+                </button>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="profile-main">
+                <!-- General Settings -->
+                <div class="settings-section active" id="general-section">
+                    <div class="form-section">
+                        <h2 class="section-title">Cài đặt chung</h2>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Ngôn ngữ</div>
+                                <div class="setting-description">Chọn ngôn ngữ hiển thị</div>
+                            </div>
+                            <select class="setting-select" id="languageSelect">
+                                <option value="vi">Tiếng Việt</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Múi giờ</div>
+                                <div class="setting-description">Thời gian hiển thị theo múi giờ này</div>
+                            </div>
+                            <select class="setting-select" id="timezoneSelect">
+                                <option value="Asia/Ho_Chi_Minh">Giờ Việt Nam (GMT+7)</option>
+                                <option value="Asia/Bangkok">Bangkok (GMT+7)</option>
+                                <option value="Asia/Singapore">Singapore (GMT+8)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Tự động đăng nhập</div>
+                                <div class="setting-description">Giữ đăng nhập trên thiết bị này</div>
+                            </div>
+                            <div class="toggle-switch" id="autoLoginToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="settings-section" id="notifications-section">
+                    <div class="form-section">
+                        <h2 class="section-title">Thông báo</h2>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Thông báo email</div>
+                                <div class="setting-description">Nhận thông báo qua email</div>
+                            </div>
+                            <div class="toggle-switch active" id="emailNotifToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Thông báo desktop</div>
+                                <div class="setting-description">Hiển thị thông báo trên desktop</div>
+                            </div>
+                            <div class="toggle-switch" id="desktopNotifToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Thông báo âm thanh</div>
+                                <div class="setting-description">Phát âm thanh khi có thông báo mới</div>
+                            </div>
+                            <div class="toggle-switch active" id="soundNotifToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Bản tin hàng tuần</div>
+                                <div class="setting-description">Nhận bản tin tổng kết mỗi tuần</div>
+                            </div>
+                            <div class="toggle-switch active" id="weeklyDigestToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="settings-section" id="security-section">
+                    <div class="form-section">
+                        <h2 class="section-title">Bảo mật</h2>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Xác thực 2 bước (2FA)</div>
+                                <div class="setting-description">Thêm lớp bảo mật cho tài khoản</div>
+                            </div>
+                            <button class="btn-secondary" id="setup2FABtn">
+                                Cài đặt
+                            </button>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Đổi mật khẩu</div>
+                                <div class="setting-description">Cập nhật mật khẩu của bạn</div>
+                            </div>
+                            <button class="btn-secondary" onclick="window.location.href='change-password.html'">
+                                Đổi mật khẩu
+                            </button>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Phiên đăng nhập</div>
+                                <div class="setting-description">Quản lý thiết bị đã đăng nhập</div>
+                            </div>
+                            <button class="btn-secondary" id="manageSessionsBtn">
+                                Quản lý
+                            </button>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Tự động đăng xuất</div>
+                                <div class="setting-description">Đăng xuất sau 30 phút không hoạt động</div>
+                            </div>
+                            <div class="toggle-switch active" id="autoLogoutToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Danger Zone -->
+                    <div class="danger-zone">
+                        <div class="danger-zone-title">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 1.667L1.667 18.333h16.666L10 1.667z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M10 7.5v3.333M10 14.167h.008" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Vùng nguy hiểm
+                        </div>
+                        <p class="danger-zone-description">
+                            Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
+                        </p>
+                        <button class="btn-danger" id="deleteAccountBtn">
+                            Xóa tài khoản
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Appearance Settings -->
+                <div class="settings-section" id="appearance-section">
+                    <div class="form-section">
+                        <h2 class="section-title">Giao diện</h2>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Chế độ tối</div>
+                                <div class="setting-description">Sử dụng giao diện tối</div>
+                            </div>
+                            <div class="toggle-switch" id="darkModeToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Màu chủ đạo</div>
+                                <div class="setting-description">Tùy chỉnh màu giao diện</div>
+                            </div>
+                            <select class="setting-select" id="themeColorSelect">
+                                <option value="blue">Xanh dương</option>
+                                <option value="purple">Tím</option>
+                                <option value="green">Xanh lá</option>
+                                <option value="red">Đỏ</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Hiệu ứng chuyển động</div>
+                                <div class="setting-description">Bật/tắt animation trong giao diện</div>
+                            </div>
+                            <div class="toggle-switch active" id="animationsToggle">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-title">Kích thước font</div>
+                                <div class="setting-description">Điều chỉnh kích thước chữ</div>
+                            </div>
+                            <select class="setting-select" id="fontSizeSelect">
+                                <option value="small">Nhỏ</option>
+                                <option value="medium" selected>Trung bình</option>
+                                <option value="large">Lớn</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Toast -->
+    <div class="toast success-toast" id="successToast">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="9" fill="#10b981"/>
+            <path d="M6 10l2.5 2.5L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="toastMessage">Đã lưu cài đặt!</span>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>

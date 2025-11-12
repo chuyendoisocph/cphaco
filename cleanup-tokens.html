@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanup Old Tokens - CPHACO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .token-list {
+            list-style: none;
+            margin: 10px 0;
+        }
+
+        .token-list li {
+            padding: 8px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .token-list li.old {
+            background: #ffe5e5;
+            color: #d63031;
+        }
+
+        .token-list li.current {
+            background: #e5ffe5;
+            color: #00b894;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+        }
+
+        .button.danger {
+            background: linear-gradient(135deg, #d63031, #e17055);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #1565c0;
+        }
+
+        .alert.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .alert.warning {
+            background: #fff3e0;
+            color: #e65100;
+            border-left: 4px solid #e65100;
+        }
+
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .log.show {
+            display: block;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Token Cleanup Tool</h1>
+        <p class="subtitle">Công cụ dọn dẹp token cũ trong localStorage</p>
+
+        <div id="alerts"></div>
+
+        <div class="status-box">
+            <h3>📊 Trạng thái hiện tại:</h3>
+            <p id="status">Đang quét localStorage...</p>
+            <ul class="token-list" id="tokenList"></ul>
+        </div>
+
+        <button class="button" id="scanBtn" onclick="scanTokens()">🔍 Quét Token</button>
+        <button class="button danger" id="cleanBtn" onclick="cleanupTokens()" style="display: none;">🗑️ Xóa Token Cũ</button>
+        <button class="button success" id="doneBtn" onclick="goToDashboard()" style="display: none;">✓ Hoàn tất - Về Dashboard</button>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const CORRECT_TOKEN_KEY = 'CP_AUTH_TOKEN';
+        const OLD_TOKEN_KEYS = ['authToken', 'token', 'jwt', 'access_token'];
+        
+        let foundTokens = {
+            correct: null,
+            old: []
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const timestamp = new Date().toLocaleTimeString('vi-VN');
+            const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+            
+            entry.textContent = `[${timestamp}] ${icon} ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            logDiv.classList.add('show');
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertsDiv = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            alertsDiv.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function scanTokens() {
+            log('Bắt đầu quét localStorage...', 'info');
+            
+            foundTokens = {
+                correct: null,
+                old: []
+            };
+
+            const tokenList = document.getElementById('tokenList');
+            tokenList.innerHTML = '';
+
+            // Check correct token
+            const correctToken = localStorage.getItem(CORRECT_TOKEN_KEY);
+            if (correctToken) {
+                foundTokens.correct = {
+                    key: CORRECT_TOKEN_KEY,
+                    value: correctToken
+                };
+                
+                const li = document.createElement('li');
+                li.className = 'current';
+                li.textContent = `✓ ${CORRECT_TOKEN_KEY} (Token hiện tại - OK)`;
+                tokenList.appendChild(li);
+                
+                log(`Tìm thấy token đúng: ${CORRECT_TOKEN_KEY}`, 'success');
+            } else {
+                const li = document.createElement('li');
+                li.textContent = `✗ ${CORRECT_TOKEN_KEY} (Không tìm thấy)`;
+                tokenList.appendChild(li);
+                
+                log(`Không tìm thấy token: ${CORRECT_TOKEN_KEY}`, 'error');
+            }
+
+            // Check old tokens
+            OLD_TOKEN_KEYS.forEach(key => {
+                const token = localStorage.getItem(key);
+                if (token) {
+                    foundTokens.old.push({ key, value: token });
+                    
+                    const li = document.createElement('li');
+                    li.className = 'old';
+                    li.textContent = `⚠ ${key} (Token cũ - nên xóa)`;
+                    tokenList.appendChild(li);
+                    
+                    log(`Tìm thấy token cũ: ${key}`, 'info');
+                }
+            });
+
+            // Update status
+            const statusDiv = document.getElementById('status');
+            if (foundTokens.old.length > 0) {
+                statusDiv.textContent = `Tìm thấy ${foundTokens.old.length} token cũ cần xóa`;
+                document.getElementById('cleanBtn').style.display = 'block';
+                showAlert(`⚠️ Tìm thấy ${foundTokens.old.length} token cũ. Nên xóa để tránh xung đột!`, 'warning');
+            } else if (foundTokens.correct) {
+                statusDiv.textContent = '✅ Chỉ có token đúng, không có token cũ';
+                document.getElementById('doneBtn').style.display = 'block';
+                showAlert('✓ Hệ thống đã sạch sẽ! Không có token cũ.', 'success');
+            } else {
+                statusDiv.textContent = '❌ Không tìm thấy token nào. Cần đăng nhập lại.';
+                showAlert('❌ Không có token. Vui lòng đăng nhập lại.', 'warning');
+                
+                setTimeout(() => {
+                    window.location.href = 'signin.html';
+                }, 3000);
+            }
+
+            log('Hoàn tất quét localStorage', 'success');
+        }
+
+        function cleanupTokens() {
+            if (foundTokens.old.length === 0) {
+                showAlert('✓ Không có token cũ để xóa', 'info');
+                return;
+            }
+
+            log('Bắt đầu xóa token cũ...', 'info');
+
+            let deletedCount = 0;
+            foundTokens.old.forEach(({ key }) => {
+                try {
+                    localStorage.removeItem(key);
+                    deletedCount++;
+                    log(`Đã xóa: ${key}`, 'success');
+                } catch (error) {
+                    log(`Lỗi khi xóa ${key}: ${error.message}`, 'error');
+                }
+            });
+
+            // Clear old tokens array
+            foundTokens.old = [];
+
+            // Update UI
+            document.getElementById('cleanBtn').style.display = 'none';
+            document.getElementById('doneBtn').style.display = 'block';
+            
+            showAlert(`✓ Đã xóa ${deletedCount} token cũ thành công!`, 'success');
+            log(`Hoàn tất! Đã xóa ${deletedCount} token`, 'success');
+
+            // Rescan to verify
+            setTimeout(() => {
+                scanTokens();
+            }, 1000);
+        }
+
+        function goToDashboard() {
+            log('Chuyển hướng về Dashboard...', 'info');
+            showAlert('Đang chuyển hướng...', 'info');
+            
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1000);
+        }
+
+        // Auto scan on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                scanTokens();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 // ========================================
 // SIGNUP.JS - CPHACO.APP (REAL BACKEND)
 // User registration with OTP verification
+// 2-Step Form with OTP Input UI
 // ========================================
 
 // ===== CONFIGURATION =====
@@ -11,6 +12,9 @@ let currentStep = 1;  // 1 = Form, 2 = OTP
 let userEmail = '';
 let userFullname = '';
 let userPassword = '';
+let otpTimerInterval = null;
+let resendTimerInterval = null;
+let otpExpiryTime = null;
 
 // ===== DOM ELEMENTS =====
 const togglePassword = document.getElementById('togglePassword');
@@ -253,7 +257,7 @@ signupForm.addEventListener('submit', async function(e) {
     if (!isValid) return;
     
     // Show loading state
-    const submitButton = this.querySelector('.submit-button');
+    const submitButton = document.getElementById('submitBtn');
     const originalText = submitButton.innerHTML;
     submitButton.classList.add('loading');
     submitButton.innerHTML = '<span>Đang gửi OTP...</span>';
@@ -268,38 +272,16 @@ signupForm.addEventListener('submit', async function(e) {
         // Send OTP
         await sendOTP(userEmail);
         
-        submitButton.innerHTML = '<span>OTP đã được gửi!</span>';
+        submitButton.innerHTML = '<span>✓ OTP đã được gửi!</span>';
         
-        // Wait 1 second
+        // Wait 1 second then switch to OTP step
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Prompt for OTP
-        const otpCode = prompt(`Mã OTP đã được gửi đến ${userEmail}\n\nVui lòng nhập mã OTP (6 chữ số):`);
-        
-        if (!otpCode) {
-            throw new Error('Bạn chưa nhập OTP');
-        }
-        
-        if (!/^\d{6}$/.test(otpCode)) {
-            throw new Error('OTP phải là 6 chữ số');
-        }
-        
-        // Register with OTP
-        submitButton.innerHTML = '<span>Đang tạo tài khoản...</span>';
-        
-        const result = await registerUser(userFullname, userEmail, userPassword, otpCode);
-        
-        // Success
-        showSuccessMessage();
-        submitButton.innerHTML = '<span>✓ Thành công!</span>';
-        
-        // Redirect after 2 seconds
-        setTimeout(() => {
-            window.location.href = 'signin.html';
-        }, 2000);
+        // Switch to OTP step
+        switchToOTPStep();
         
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('Send OTP error:', error);
         
         submitButton.classList.remove('loading');
         submitButton.innerHTML = originalText;
@@ -308,7 +290,7 @@ signupForm.addEventListener('submit', async function(e) {
         if (error.message.includes('Email') || error.message.includes('email')) {
             showError(emailInput, error.message);
         } else {
-            alert(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+            alert(error.message || 'Không thể gửi OTP. Vui lòng thử lại.');
         }
         
         // Shake animation
@@ -319,22 +301,361 @@ signupForm.addEventListener('submit', async function(e) {
     }
 });
 
+// ===== OTP STEP FUNCTIONS =====
+
+/**
+ * Switch to OTP verification step
+ */
+function switchToOTPStep() {
+    // Update step indicators
+    document.getElementById('step1Indicator').classList.add('completed');
+    document.getElementById('step1Indicator').classList.remove('active');
+    document.getElementById('divider1').classList.add('completed');
+    document.getElementById('step2Indicator').classList.add('active');
+    
+    // Hide registration form, show OTP form
+    document.getElementById('registrationStep').style.display = 'none';
+    document.getElementById('otpStep').classList.add('active');
+    
+    // Display email
+    document.getElementById('otpEmail').textContent = userEmail;
+    
+    // Focus first OTP input
+    document.getElementById('otp1').focus();
+    
+    // Start timers
+    startOTPTimer();
+    startResendTimer();
+    
+    currentStep = 2;
+}
+
+/**
+ * Switch back to registration form
+ */
+function switchToRegistrationStep() {
+    // Update step indicators
+    document.getElementById('step1Indicator').classList.add('active');
+    document.getElementById('step1Indicator').classList.remove('completed');
+    document.getElementById('divider1').classList.remove('completed');
+    document.getElementById('step2Indicator').classList.remove('active');
+    
+    // Show registration form, hide OTP form
+    document.getElementById('registrationStep').style.display = 'block';
+    document.getElementById('otpStep').classList.remove('active');
+    
+    // Clear OTP inputs
+    clearOTPInputs();
+    
+    // Stop timers
+    stopTimers();
+    
+    // Reset button states
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('loading');
+    submitBtn.innerHTML = '<span>Tiếp tục</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4.16666 10H15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 4.16667L15.8333 10L10 15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    
+    currentStep = 1;
+}
+
+/**
+ * Start OTP expiry timer (10 minutes)
+ */
+function startOTPTimer() {
+    otpExpiryTime = Date.now() + (10 * 60 * 1000); // 10 minutes
+    
+    otpTimerInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = otpExpiryTime - now;
+        
+        if (remaining <= 0) {
+            clearInterval(otpTimerInterval);
+            document.getElementById('timerDisplay').textContent = '0:00';
+            document.getElementById('otpTimer').classList.add('expired');
+            document.getElementById('otpTimer').innerHTML = '⚠️ Mã OTP đã hết hạn. Vui lòng <strong>gửi lại</strong>.';
+            return;
+        }
+        
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        document.getElementById('timerDisplay').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+/**
+ * Start resend cooldown timer (60 seconds)
+ */
+function startResendTimer() {
+    let countdown = 60;
+    const resendBtn = document.getElementById('resendBtn');
+    const resendTimerSpan = document.getElementById('resendTimer');
+    
+    resendBtn.disabled = true;
+    
+    resendTimerInterval = setInterval(() => {
+        countdown--;
+        resendTimerSpan.textContent = countdown;
+        
+        if (countdown <= 0) {
+            clearInterval(resendTimerInterval);
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Gửi lại mã';
+        }
+    }, 1000);
+}
+
+/**
+ * Stop all timers
+ */
+function stopTimers() {
+    if (otpTimerInterval) {
+        clearInterval(otpTimerInterval);
+        otpTimerInterval = null;
+    }
+    if (resendTimerInterval) {
+        clearInterval(resendTimerInterval);
+        resendTimerInterval = null;
+    }
+}
+
+/**
+ * Clear OTP inputs
+ */
+function clearOTPInputs() {
+    for (let i = 1; i <= 6; i++) {
+        const input = document.getElementById('otp' + i);
+        input.value = '';
+        input.classList.remove('filled', 'error');
+    }
+}
+
+/**
+ * Get OTP code from inputs
+ */
+function getOTPCode() {
+    let code = '';
+    for (let i = 1; i <= 6; i++) {
+        code += document.getElementById('otp' + i).value;
+    }
+    return code;
+}
+
+// ===== OTP INPUT HANDLING =====
+
+// Setup OTP inputs
+const otpInputs = [];
+for (let i = 1; i <= 6; i++) {
+    const input = document.getElementById('otp' + i);
+    otpInputs.push(input);
+    
+    // Handle input
+    input.addEventListener('input', function(e) {
+        // Only allow numbers
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        if (this.value) {
+            this.classList.add('filled');
+            this.classList.remove('error');
+            
+            // Move to next input
+            const nextInput = otpInputs[otpInputs.indexOf(this) + 1];
+            if (nextInput) {
+                nextInput.focus();
+            }
+        } else {
+            this.classList.remove('filled');
+        }
+    });
+    
+    // Handle keydown
+    input.addEventListener('keydown', function(e) {
+        // Backspace - move to previous input
+        if (e.key === 'Backspace' && !this.value) {
+            const prevInput = otpInputs[otpInputs.indexOf(this) - 1];
+            if (prevInput) {
+                prevInput.focus();
+            }
+        }
+        
+        // Arrow keys
+        if (e.key === 'ArrowLeft') {
+            const prevInput = otpInputs[otpInputs.indexOf(this) - 1];
+            if (prevInput) prevInput.focus();
+        }
+        if (e.key === 'ArrowRight') {
+            const nextInput = otpInputs[otpInputs.indexOf(this) + 1];
+            if (nextInput) nextInput.focus();
+        }
+    });
+    
+    // Handle paste
+    input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+        
+        for (let j = 0; j < pastedData.length && j < 6; j++) {
+            otpInputs[j].value = pastedData[j];
+            otpInputs[j].classList.add('filled');
+        }
+        
+        // Focus last filled input
+        if (pastedData.length < 6) {
+            otpInputs[pastedData.length].focus();
+        }
+    });
+}
+
+// ===== OTP FORM SUBMISSION =====
+
+const otpForm = document.getElementById('otpForm');
+
+otpForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const otpCode = getOTPCode();
+    
+    // Validate OTP
+    if (otpCode.length !== 6) {
+        otpInputs.forEach(input => input.classList.add('error'));
+        alert('Vui lòng nhập đầy đủ 6 số');
+        return;
+    }
+    
+    if (!/^\d{6}$/.test(otpCode)) {
+        otpInputs.forEach(input => input.classList.add('error'));
+        alert('OTP chỉ bao gồm số');
+        return;
+    }
+    
+    // Show loading
+    const verifyBtn = document.getElementById('verifyBtn');
+    const originalText = verifyBtn.innerHTML;
+    verifyBtn.classList.add('loading');
+    verifyBtn.innerHTML = '<span>Đang xác thực...</span>';
+    verifyBtn.disabled = true;
+    
+    try {
+        // Register with OTP
+        const result = await registerUser(userFullname, userEmail, userPassword, otpCode);
+        
+        // Success
+        verifyBtn.innerHTML = '<span>✓ Thành công!</span>';
+        
+        // Stop timers
+        stopTimers();
+        
+        // Show success message
+        showSuccessMessage();
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+            window.location.href = 'signin.html';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Verification error:', error);
+        
+        verifyBtn.classList.remove('loading');
+        verifyBtn.innerHTML = originalText;
+        verifyBtn.disabled = false;
+        
+        // Highlight inputs as error
+        otpInputs.forEach(input => input.classList.add('error'));
+        
+        alert(error.message || 'Xác thực thất bại. Vui lòng thử lại.');
+        
+        // Clear inputs
+        clearOTPInputs();
+        document.getElementById('otp1').focus();
+    }
+});
+
+// ===== RESEND OTP =====
+
+document.getElementById('resendBtn').addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = 'Đang gửi...';
+    
+    try {
+        await sendOTP(userEmail);
+        
+        // Restart timers
+        stopTimers();
+        startOTPTimer();
+        startResendTimer();
+        
+        // Clear inputs
+        clearOTPInputs();
+        document.getElementById('otp1').focus();
+        
+        // Reset timer display
+        document.getElementById('otpTimer').classList.remove('expired');
+        document.getElementById('otpTimer').innerHTML = 'Mã hết hạn sau: <strong id="timerDisplay">10:00</strong>';
+        
+        alert('✓ Mã OTP mới đã được gửi!');
+        
+    } catch (error) {
+        this.disabled = false;
+        this.textContent = 'Gửi lại mã';
+        alert(error.message || 'Không thể gửi lại OTP. Vui lòng thử lại.');
+    }
+});
+
+// ===== BACK TO FORM =====
+
+document.getElementById('backToForm').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    if (confirm('Bạn có chắc muốn quay lại? Mã OTP hiện tại sẽ hết hiệu lực.')) {
+        switchToRegistrationStep();
+    }
+});
+
 // ===== SUCCESS MESSAGE =====
 
 function showSuccessMessage() {
-    const existingSuccess = document.querySelector('.success-message');
-    if (existingSuccess) {
-        existingSuccess.remove();
+    // Remove existing success message if any
+    const existing = document.querySelector('.success-message');
+    if (existing) {
+        existing.remove();
     }
     
+    const existingOverlay = document.querySelector('.success-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'success-overlay';
+    document.body.appendChild(overlay);
+    
+    // Create success message
     const successDiv = document.createElement('div');
     successDiv.className = 'success-message';
-    successDiv.textContent = '✓ Tạo tài khoản thành công! Đang chuyển đến trang đăng nhập...';
+    successDiv.innerHTML = `
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <h3 class="success-title">🎉 Đăng ký thành công!</h3>
+        <p class="success-text">Đang chuyển đến trang đăng nhập...</p>
+    `;
     
-    const formHeader = document.querySelector('.form-header');
-    if (formHeader) {
-        formHeader.insertAdjacentElement('afterend', successDiv);
-    }
+    document.body.appendChild(successDiv);
+    
+    // Auto remove after animation
+    setTimeout(() => {
+        successDiv.style.animation = 'successPop 0.3s ease reverse';
+        overlay.style.animation = 'fadeIn 0.3s ease reverse';
+        
+        setTimeout(() => {
+            successDiv.remove();
+            overlay.remove();
+        }, 300);
+    }, 1700); // Remove before redirect
 }
 
 // ===== VISUAL ENHANCEMENTS =====

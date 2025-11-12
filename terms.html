@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>CPHACO – Điều khoản sử dụng</title>
+  <link rel="icon" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+
+  <style>
+    :root{
+      --ink: var(--text-primary);
+      --muted: var(--text-secondary);
+      --card: var(--bg-card);
+      --radius: 20px;
+      --stroke: var(--border-color);
+    }
+    body{ background: linear-gradient(180deg,#f8fbff, #ffffff 40%, #f6f9ff 100%); }
+
+    .topbar{
+      position: sticky; top:0; z-index:999;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255,255,255,.75);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .topbar .container{
+      display:flex; align-items:center; gap:1rem; padding:.75rem 2rem;
+      font-size:.9375rem; color:var(--muted);
+    }
+    .topbar .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+      box-shadow:0 0 0 4px rgba(0,102,255,.12);
+      flex:0 0 10px;
+    }
+
+    .hero{
+      position:relative; padding:9rem 0 4rem; text-align:center; overflow:hidden;
+    }
+    .hero .orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.45; z-index:0; animation: float 22s ease-in-out infinite; }
+    .hero .o1{ width:520px;height:520px; background:linear-gradient(135deg,var(--gradient-start),#7dd3fc); top:-120px; right:-160px;}
+    .hero .o2{ width:420px;height:420px; background:linear-gradient(135deg,#a78bfa,#60a5fa); bottom:-140px; left:-160px; animation-delay:-7s;}
+    .hero .o3{ width:320px;height:320px; background:linear-gradient(135deg,#f093fb,#f5576c); top:40%; left:35%; animation-delay:-12s;}
+    @keyframes float{0%,100%{transform:translate(0,0)} 33%{transform:translate(24px,-24px)} 66%{transform:translate(-20px,20px)}}
+    .hero .container{ position:relative; z-index:1; }
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1rem;
+      border-radius:999px; background:#fff; box-shadow:var(--shadow-md);
+      color:var(--primary-blue); font-weight:600; font-size:.9rem;
+    }
+    .hero h1{
+      margin:1.25rem auto .75rem; max-width:960px; font-size:clamp(2rem,5vw,4rem);
+      line-height:1.1; font-weight:800; color:var(--ink);
+    }
+    .hero .grad{
+      background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .hero p{ max-width:840px; margin:0 auto 2rem; color:var(--muted); font-size:1.1rem; line-height:1.7; }
+
+    .section{ padding:4.5rem 0; }
+    .grid{
+      display:grid; grid-template-columns: 1fr 280px; gap:2rem; align-items:start;
+    }
+    .card{
+      background:#fff; border:1px solid var(--stroke); border-radius:20px; padding:1.5rem; box-shadow:var(--shadow-lg);
+    }
+    .toc{
+      position:sticky; top:84px; background:rgba(255,255,255,.7); backdrop-filter: blur(10px);
+      border:1px solid var(--stroke); border-radius:16px; padding:1rem; box-shadow:var(--shadow-sm);
+    }
+    .toc a{ display:block; padding:.5rem .75rem; border-radius:10px; color:var(--muted); text-decoration:none; font-weight:600; }
+    .toc a.active, .toc a:hover{ background:#fff; color:var(--ink); border:1px solid var(--stroke); }
+
+    .h2{ font-size:1.4rem; font-weight:800; margin:0 0 .5rem 0; color:var(--ink); }
+    .muted{ color:var(--muted); }
+    .list{ margin:.5rem 0 0 1.25rem; line-height:1.7; }
+    .badge{
+      display:inline-block; font-size:.8rem; font-weight:700; padding:.2rem .6rem; border:1px solid var(--stroke);
+      border-radius:999px; color:var(--muted); background:#fff; margin-left:.5rem;
+    }
+    .cta-box{
+      margin-top:1.25rem; background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+      color:#fff; border-radius:16px; padding:1.25rem; display:flex; justify-content:space-between; gap:1rem; align-items:center;
+      box-shadow:0 24px 60px rgba(0,102,255,.25);
+    }
+    .cta-box a{ background:#fff; color:var(--primary-blue); border-radius:12px; padding:.8rem 1.1rem; text-decoration:none; font-weight:800; }
+
+    @media (max-width: 1024px){
+      .grid{ grid-template-columns: 1fr; }
+      .toc{ position:relative; top:auto; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Info -->
+  <div class="topbar">
+    <div class="container">
+      <div class="dot"></div>
+      <div><strong>Điều khoản sử dụng</strong> – Vui lòng đọc kỹ trước khi dùng các ứng dụng/dịch vụ CPHACO.</div>
+    </div>
+  </div>
+
+  <!-- Main Nav (reuses your styles.css classes) -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" href="#">
+        <img src="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" alt="CPHACO">
+        <span class="nav-brand">CPHACO</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="#accept">Chấp nhận</a>
+        <a class="nav-link" href="#accounts">Tài khoản</a>
+        <a class="nav-link" href="#conduct">Sử dụng hợp lệ</a>
+        <a class="nav-link" href="#ip">Sở hữu trí tuệ</a>
+        <a class="nav-link-cta" href="#contact">Liên hệ</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+    <div class="container">
+      <div class="eyebrow">📜 Điều khoản sử dụng</div>
+      <h1>Điều khoản <span class="grad">sử dụng</span> dịch vụ CPHACO</h1>
+      <p>Văn bản này quy định quyền và nghĩa vụ giữa bạn và CPHACO khi sử dụng các ứng dụng, trang web, API và dịch vụ liên quan.</p>
+      <div class="muted">Cập nhật lần cuối: 11/11/2025</div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <section class="section">
+    <div class="container grid">
+      <!-- Main content -->
+      <div>
+        <!-- 1. Acceptance -->
+        <article id="accept" class="card">
+          <h2 class="h2">1) Chấp nhận Điều khoản</h2>
+          <p>Bằng việc truy cập hoặc sử dụng dịch vụ, bạn xác nhận đã đọc, hiểu và đồng ý bị ràng buộc bởi Điều khoản này và <a href="privacy.html">Chính sách Quyền riêng tư</a>. Nếu bạn không đồng ý, vui lòng ngừng sử dụng dịch vụ.</p>
+          <p class="muted">Văn bản này có thể được cập nhật theo mục <a href="#changes">Thay đổi Điều khoản</a>.</p>
+        </article>
+
+        <!-- 2. Eligibility & Accounts -->
+        <article id="accounts" class="card" style="margin-top:1rem">
+          <h2 class="h2">2) Tài khoản & Điều kiện sử dụng</h2>
+          <ul class="list">
+            <li><strong>Tính chính xác:</strong> Bạn cung cấp thông tin chính xác, đầy đủ và được cập nhật.</li>
+            <li><strong>Bảo mật:</strong> Bạn chịu trách nhiệm bảo mật thông tin đăng nhập; thông báo ngay khi nghi ngờ truy cập trái phép.</li>
+            <li><strong>Phân quyền:</strong> Quyền truy cập dựa trên vai trò (RBAC). Cấm vượt quyền hoặc lách kiểm soát.</li>
+            <li><strong>Doanh nghiệp:</strong> Nếu dùng thay mặt tổ chức, bạn xác nhận có thẩm quyền ràng buộc tổ chức với Điều khoản.</li>
+          </ul>
+        </article>
+
+        <!-- 3. Acceptable Use -->
+        <article id="conduct" class="card" style="margin-top:1rem">
+          <h2 class="h2">3) Sử dụng hợp lệ</h2>
+          <p>Bạn đồng ý KHÔNG thực hiện các hành vi sau:</p>
+          <ul class="list">
+            <li>Vi phạm pháp luật; xâm phạm quyền riêng tư hoặc quyền sở hữu trí tuệ của bên thứ ba.</li>
+            <li>Can thiệp vào vận hành dịch vụ (DDoS, quét lỗ hổng trái phép, tiêm mã độc, vượt rate-limit).</li>
+            <li>Thu thập, khai thác dữ liệu trái phép; bán, cho thuê hoặc chia sẻ trái thẩm quyền dữ liệu nội bộ.</li>
+            <li>Sử dụng dịch vụ cho nội dung độc hại, thù hằn, lừa đảo, khiêu dâm trái luật, bạo lực, hoặc sai lệch.</li>
+          </ul>
+          <p><span class="badge">Hậu quả</span> CPHACO có thể tạm ngưng/đình chỉ/khóa tài khoản khi phát hiện vi phạm.</p>
+        </article>
+
+        <!-- 4. User Content -->
+        <article id="content" class="card" style="margin-top:1rem">
+          <h2 class="h2">4) Nội dung do người dùng cung cấp</h2>
+          <ul class="list">
+            <li>Bạn giữ quyền đối với nội dung của mình nhưng cấp cho CPHACO giấy phép có giới hạn, không độc quyền, có thể chấm dứt, để vận hành và cải thiện dịch vụ.</li>
+            <li>Bạn cam kết có đầy đủ quyền đối với nội dung tải lên/nhập vào hệ thống.</li>
+            <li>CPHACO có thể gỡ nội dung vi phạm Điều khoản hoặc pháp luật áp dụng.</li>
+          </ul>
+        </article>
+
+        <!-- 5. IP -->
+        <article id="ip" class="card" style="margin-top:1rem">
+          <h2 class="h2">5) Quyền sở hữu trí tuệ</h2>
+          <p>Dịch vụ, mã nguồn, thiết kế, biểu trưng, tên thương mại và các thành tố khác thuộc quyền sở hữu của CPHACO hoặc được cấp phép hợp pháp. Không sao chép, chỉnh sửa, dịch ngược, tạo sản phẩm phái sinh nếu không có chấp thuận bằng văn bản.</p>
+        </article>
+
+        <!-- 6. Third-party -->
+        <article id="thirdparty" class="card" style="margin-top:1rem">
+          <h2 class="h2">6) Dịch vụ của bên thứ ba</h2>
+          <p>Dịch vụ có thể tích hợp/đưa liên kết tới nền tảng của bên thứ ba (ví dụ: Google, Map, CDN). CPHACO không chịu trách nhiệm về nội dung, chính sách hay hành vi của các bên này. Bạn nên xem điều khoản và chính sách riêng của họ.</p>
+        </article>
+
+        <!-- 7. Disclaimers -->
+        <article id="disclaimer" class="card" style="margin-top:1rem">
+          <h2 class="h2">7) Tuyên bố miễn trừ</h2>
+          <p>Dịch vụ được cung cấp “nguyên trạng” và “tuỳ khả dụng”. Trong phạm vi tối đa được pháp luật cho phép, CPHACO miễn trừ mọi bảo đảm, bao gồm nhưng không giới hạn: phù hợp mục đích cụ thể, không vi phạm, và không lỗi gián đoạn.</p>
+        </article>
+
+        <!-- 8. Liability -->
+        <article id="liability" class="card" style="margin-top:1rem">
+          <h2 class="h2">8) Giới hạn trách nhiệm</h2>
+          <p>Trong phạm vi pháp luật cho phép, CPHACO không chịu trách nhiệm với bất kỳ thiệt hại gián tiếp, ngẫu nhiên, đặc biệt, hệ quả hoặc mất lợi nhuận phát sinh từ việc sử dụng hoặc không thể sử dụng dịch vụ. Trách nhiệm tổng cộng của CPHACO, nếu có, sẽ không vượt quá khoản bạn đã thanh toán cho dịch vụ trong 12 tháng gần nhất.</p>
+        </article>
+
+        <!-- 9. Indemnity -->
+        <article id="indemnity" class="card" style="margin-top:1rem">
+          <h2 class="h2">9) Bồi thường</h2>
+          <p>Bạn đồng ý bồi thường, bảo vệ và giữ cho CPHACO không bị thiệt hại trước mọi khiếu nại, tổn thất, chi phí (bao gồm phí luật sư hợp lý) phát sinh từ việc bạn vi phạm Điều khoản hoặc sử dụng dịch vụ trái pháp luật.</p>
+        </article>
+
+        <!-- 10. Termination -->
+        <article id="termination" class="card" style="margin-top:1rem">
+          <h2 class="h2">10) Chấm dứt</h2>
+          <p>CPHACO có thể chấm dứt hoặc tạm ngưng quyền truy cập của bạn bất kỳ lúc nào khi có dấu hiệu vi phạm. Sau khi chấm dứt, các điều khoản về sở hữu trí tuệ, miễn trừ, giới hạn trách nhiệm và bồi thường vẫn có hiệu lực.</p>
+        </article>
+
+        <!-- 11. Governing Law -->
+        <article id="law" class="card" style="margin-top:1rem">
+          <h2 class="h2">11) Luật áp dụng & giải quyết tranh chấp</h2>
+          <p>Điều khoản này được điều chỉnh bởi pháp luật Việt Nam. Tranh chấp (nếu có) sẽ ưu tiên giải quyết bằng thương lượng; nếu không thành, được đưa ra toà án có thẩm quyền tại Việt Nam.</p>
+        </article>
+
+        <!-- 12. Changes -->
+        <article id="changes" class="card" style="margin-top:1rem">
+          <h2 class="h2">12) Thay đổi Điều khoản</h2>
+          <p>Chúng tôi có thể cập nhật Điều khoản để phản ánh thay đổi về tính năng, pháp luật, hoặc vận hành. Khi cập nhật, ngày hiệu lực sẽ điều chỉnh tương ứng. Việc tiếp tục sử dụng sau khi cập nhật đồng nghĩa bạn chấp nhận Điều khoản mới.</p>
+        </article>
+
+        <!-- 13. Contact -->
+        <article id="contact" class="card" style="margin-top:1rem">
+          <h2 class="h2">13) Liên hệ</h2>
+          <p>Mọi câu hỏi hoặc yêu cầu về Điều khoản, vui lòng liên hệ: <a href="mailto:legal@cphaco.app">legal@cphaco.app</a>.</p>
+          <div class="cta-box">
+            <div><strong>Cần hỗ trợ pháp lý/tuân thủ?</strong><br><span class="muted">Trao đổi với bộ phận pháp chế/tuân thủ của CPHACO.</span></div>
+            <a href="mailto:legal@cphaco.app">Liên hệ legal@cphaco.app</a>
+          </div>
+        </article>
+      </div>
+
+      <!-- TOC -->
+      <aside class="toc" id="toc">
+        <a href="#accept" class="active">1. Chấp nhận</a>
+        <a href="#accounts">2. Tài khoản</a>
+        <a href="#conduct">3. Sử dụng hợp lệ</a>
+        <a href="#content">4. Nội dung người dùng</a>
+        <a href="#ip">5. Sở hữu trí tuệ</a>
+        <a href="#thirdparty">6. Bên thứ ba</a>
+        <a href="#disclaimer">7. Miễn trừ</a>
+        <a href="#liability">8. Trách nhiệm</a>
+        <a href="#indemnity">9. Bồi thường</a>
+        <a href="#termination">10. Chấm dứt</a>
+        <a href="#law">11. Luật áp dụng</a>
+        <a href="#changes">12. Thay đổi</a>
+        <a href="#contact">13. Liên hệ</a>
+        <div style="margin-top:.75rem" class="muted">Phiên bản: 1.0 • 11/11/2025</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img style="width: 80px;" src="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png" alt="CPHACO">
+          <div class="footer-brand-name">CPHACO</div>
+          <div class="footer-tagline">Sử dụng minh bạch – an toàn – tuân thủ.</div>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Pháp lý</h4>
+            <a href="privacy.html">Quyền riêng tư</a>
+            <a href="#law">Luật áp dụng</a>
+            <a href="#changes">Thay đổi</a>
+          </div>
+          <div class="footer-column">
+            <h4>Hỗ trợ</h4>
+            <a href="#contact">Liên hệ pháp lý</a>
+            <a href="mailto:support@cphaco.app">Hỗ trợ kỹ thuật</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© <span id="y"></span> CPHACO.</div>
+        <div class="footer-bottom-links">
+          <a href="#">Cookie</a>
+          <a href="#">Bảo mật</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // năm bản quyền
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // nav on scroll
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', window.scrollY > 10));
+
+    // TOC active on scroll
+    const ids = ['accept','accounts','conduct','content','ip','thirdparty','disclaimer','liability','indemnity','termination','law','changes','contact'];
+    const sections = ids.map(id=>document.getElementById(id));
+    const links = Array.from(document.querySelectorAll('#toc a'));
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          links.forEach(a=>a.classList.remove('active'));
+          const active = document.querySelector('#toc a[href="#'+e.target.id+'"]');
+          if(active) active.classList.add('active');
+        }
+      });
+    },{rootMargin:'-40% 0px -55% 0px', threshold:[0,1]});
+    sections.forEach(s=>observer.observe(s));
+  </script>
+</body>
+</html>
