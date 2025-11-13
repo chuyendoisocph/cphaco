@@ -5,16 +5,10 @@
 
 // ===== CONFIGURATION =====
 const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec';
-
+const TOKEN_KEY = 'CP_AUTH_TOKEN';  // đảm bảo mọi file dùng cùng key
+const TOKEN_KEYS = ['CP_AUTH_TOKEN','authToken','token','jwt','access_token'];
 // ===== TOKEN KEY CONFIGURATION =====
-// Define all possible token keys (in order of priority)
-const TOKEN_KEYS = [
-    'authToken',        // Most common
-    'CP_AUTH_TOKEN',    // Your custom key
-    'token',            // Generic
-    'jwt',              // JWT standard
-    'access_token'      // OAuth standard
-];
+
 
 // ===== STATE =====
 let currentUser = null;
@@ -57,17 +51,36 @@ const overlay = document.getElementById('overlay');
 
 // ===== INITIALIZATION =====
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Profile page loaded');
     
-    // Check authentication
-    checkAuth();
-    
-    // Load user profile
-    loadUserProfile();
-    
-    // Setup event listeners
-    setupEventListeners();
+   console.log('🚀 Profile page loaded');
+
+  // 1. Tạo loader
+  window.profileLoader = new ProfileLoader();
+  const loader = window.profileLoader;
+
+  // 2. Hiện loader + skeleton
+  loader.showPageLoader();
+  loader.showSkeletonLoading();
+
+  // 3. Check auth (có redirect thì tự đi)
+  checkAuth();
+
+  // 4. Load data (đợi xong)
+  try {
+    await loadUserProfile();
+  } catch (e) {
+    console.error('❌ loadUserProfile error:', e);
+  }
+
+  // 5. Gắn event listener (avatar, form, crop, ...)
+  setupEventListeners();
+
+  // 6. Tắt skeleton + loader, rồi animate
+  loader.hideSkeletonLoading();
+  loader.hidePageLoader();
+  loader.animateContent();
 });
 
 // ===== AUTHENTICATION =====
@@ -77,6 +90,154 @@ document.addEventListener('DOMContentLoaded', function() {
  * Checks multiple possible keys
  */
 
+
+
+
+
+
+function getStoredToken(){
+  // thử khôi phục từ cookie nếu lỡ mất localStorage
+  const m = document.cookie.match(/(?:^|;\s*)CP_AUTH_TOKEN=([^;]*)/);
+  if (m && !localStorage.getItem(TOKEN_KEY)) {
+    localStorage.setItem(TOKEN_KEY, decodeURIComponent(m[1]));
+  }
+  // duyệt theo thứ tự ưu tiên & chỉ nhận token parse được
+  for (const k of TOKEN_KEYS) {
+    const raw = localStorage.getItem(k);
+    if (!raw) continue;
+    try { parseJWT(normalizeToken(raw)); return normalizeToken(raw); }
+    catch { /* bỏ qua token hỏng */ }
+  }
+  return null;
+}
+
+// sau login/2FA, lưu cả 2 nơi:
+function persistToken(token){
+  if (!token) return;
+  const t = normalizeToken(token);
+  localStorage.setItem(TOKEN_KEY, t);
+  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(t)}; path=/; max-age=${60*60*24*7}; samesite=lax`;
+}
+
+function toBase64(b64url) {
+  let s = String(b64url || '').replace(/-/g, '+').replace(/_/g, '/').trim();
+  const pad = s.length % 4;
+  if (pad) s += '='.repeat(4 - pad);
+  return s;
+}
+
+function b64urlDecodeUtf8(b64url) {
+  const b64 = toBase64(b64url);
+  const bin = atob(b64);
+  // Ưu tiên TextDecoder (chuẩn UTF-8)
+  if (typeof TextDecoder !== 'undefined') {
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  // Fallback (ít chuẩn nhưng đủ cho ASCII)
+  try { return decodeURIComponent(escape(bin)); } catch { return bin; }
+}
+
+function normalizeToken(raw) {
+  if (!raw) return '';
+  let t = String(raw).trim().replace(/^"|"$/g, '');
+  if (t.startsWith('Bearer ')) t = t.slice(7).trim();
+  try {
+    const dec = decodeURIComponent(t);
+    if (dec.split('.').length === 3) t = dec;
+  } catch (_) {}
+  return t.replace(/\s+/g, '');
+}
+
+function parseJWT(token) {
+  const t = normalizeToken(token);
+  const parts = t.split('.');
+  if (parts.length !== 3) throw new Error('Invalid JWT format');
+  // Decode header/payload theo Base64URL
+  const header  = JSON.parse(b64urlDecodeUtf8(parts[0]));
+  const payload = JSON.parse(b64urlDecodeUtf8(parts[1]));
+  // (Tuỳ chọn) kiểm tra alg
+  if (header.alg && header.alg !== 'HS256') {
+    console.warn('Unexpected JWT alg:', header.alg);
+  }
+  return payload;
+}
+
+
+
+
+function safeParseJwt(token) {
+  const t = normalizeToken(token);
+  const parts = t.split('.');
+  if (parts.length !== 3) throw new Error('Invalid JWT format');
+  // chỉ nhận phần payload gồm các ký tự hợp lệ base64url
+  if (!/^[A-Za-z0-9\-_]+$/.test(parts[1])) {
+    throw new Error('Invalid base64url payload');
+  }
+  const payload = JSON.parse(b64urlDecodeUtf8(parts[1]));
+  return { payload, raw: t };
+}
+
+// Chỉ trả token hợp lệ; nếu token ở key này hỏng → thử key tiếp theo
+function getAuthToken() {
+  console.log('🔍 Searching for auth token...');
+  const badKeys = [];
+  for (const key of TOKEN_KEYS) {
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+    try {
+      const { payload, raw: cleaned } = safeParseJwt(raw);
+      console.log(`✅ Valid token at key: ${key}`, payload);
+      // Ghi đè lại bản đã chuẩn hoá (nếu khác)
+      if (cleaned !== raw) localStorage.setItem(key, cleaned);
+      return { token: cleaned, key, payload };
+    } catch (e) {
+      console.warn(`⚠️ Invalid token at key ${key}:`, e.message);
+      badKeys.push(key);
+      continue;
+    }
+  }
+  // Tuỳ chọn: dọn token hỏng để lần sau khỏi vướng
+  badKeys.forEach(k => localStorage.removeItem(k));
+  console.log('❌ No valid auth token found');
+  return null;
+}
+function checkAuth() {
+  const token = getStoredToken();              // xem mục C
+  if (!token) return redirectToSignin();
+
+  try {
+    const payload = parseJWT(token);           // DÙNG base64URL decoder (mục B)
+    const expMs = (payload.exp || 0) * 1000;
+    if (!payload.exp || Date.now() >= expMs) {
+      console.warn('Token expired');
+      // cách ly để debug, đừng xoá trắng
+      localStorage.setItem(TOKEN_KEY + '_BAD', token);
+      // localStorage.removeItem(TOKEN_KEY);   // nếu muốn, tuỳ
+      return redirectToSignin();
+    }
+    // OK
+    currentUser = payload;
+    return payload;
+
+  } catch (err) {
+    console.error('Token parse error:', err);
+    localStorage.setItem(TOKEN_KEY + '_BAD', token);
+    // localStorage.removeItem(TOKEN_KEY);
+    return redirectToSignin();
+  }
+}
+function redirectToSignin() {
+  if (!location.pathname.endsWith('/signin.html')) {
+    location.href = 'signin.html';
+  }
+}
+
+
+
+
+//
 function b64urlToUtf8(b64url) {
   let base64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
   const pad = base64.length % 4;
@@ -93,136 +254,57 @@ function parseJwtPayload(token) {
 }
 
 
-function getAuthToken() {
-    console.log('🔍 Searching for auth token...');
-    
-    for (const key of TOKEN_KEYS) {
-        const token = localStorage.getItem(key);
-        if (token) {
-            console.log(`✅ Found token with key: ${key}`);
-            return { token, key };
-        }
-    }
-    
-    console.log('❌ No auth token found');
-    console.log('Checked keys:', TOKEN_KEYS);
-    
-    // Debug: Show all localStorage items
-    console.log('All localStorage items:');
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        console.log(`  - ${key}`);
-    }
-    
-    return null;
+
+
+
+function restoreTokenFromCookie() {
+  const m = document.cookie.match(new RegExp('(?:^|; )' + TOKEN_KEY + '=([^;]*)'));
+  if (m && !localStorage.getItem(TOKEN_KEY)) {
+    const t = decodeURIComponent(m[1]);
+    localStorage.setItem(TOKEN_KEY, t);
+    console.log('🔁 Restored token from cookie mirror');
+  }
 }
 
-function checkAuth() {
-    const tokenData = getAuthToken();
-    
-    if (!tokenData) {
-        console.log('❌ No auth token found, redirecting to signin...');
-        setTimeout(() => {
-            window.location.href = 'signin.html';
-        }, 500);
-        return;
-    }
-    
-    const { token, key } = tokenData;
-    console.log(`✅ Using token from key: ${key}`);
-    
-    try {
-        // Decode JWT token
-        const parts = token.split('.');
-        if (parts.length !== 3) {
-            throw new Error('Invalid JWT format');
-        }
-        
-        const payload = parseJwtPayload(token);
-        const exp = payload.exp * 1000;
-        
-        console.log('Token payload:', payload);
-        console.log('Token expires:', new Date(exp).toLocaleString());
-        
-        if (Date.now() >= exp) {
-            console.log('❌ Token expired');
-            localStorage.removeItem(key);
-            window.location.href = 'signin.html';
-            return;
-        }
-        
-        currentUser = payload;
-        console.log('✅ User authenticated:', currentUser.email);
-        
-        // Store token key for future use
-        sessionStorage.setItem('TOKEN_KEY', key);
-        
-    } catch (error) {
-        console.error('❌ Error parsing token:', error);
-        localStorage.removeItem(tokenData.key);
-        window.location.href = 'signin.html';
-    }
+
+
+// Gọi persistToken() ngay sau khi login/verify-2FA thành công:
+async function afterLoginSuccess(data) {
+  if (data && data.token) {
+    persistToken(data.token);                  // LƯU CẢ 2 NƠI
+    const payload = parseJWT(data.token);      // dùng hàm ở mục B
+    localStorage.setItem('CP_USER_INFO', JSON.stringify(payload));
+  }
 }
+
 
 // ===== LOAD USER PROFILE =====
 
 async function loadUserProfile() {
-    if (!currentUser) return;
-    
-    try {
-        console.log('📥 Fetching profile from backend...');
-        
-        // Fetch from backend
-        const response = await fetch(`${AUTH_BASE}?action=get-profile&email=${encodeURIComponent(currentUser.email)}`, {
-            method: 'GET'
-        });
-        
-        const result = await response.json();
-        
-        if (result.ok && result.profile) {
-            const profile = result.profile;
-            
-            // Set readonly fields
-            emailInput.value = profile.email || currentUser.email;
-            roleInput.value = profile.role || 'User';
-            branchInput.value = profile.branch || '';
-            departmentInput.value = profile.department || '';
-            
-            // Set editable fields
-            fullNameInput.value = profile.name || currentUser.name || '';
-            phoneInput.value = profile.phone || '';
-            birthDateInput.value = profile.birthDate || '';
-            addressInput.value = profile.address || '';
-            bioInput.value = profile.bio || '';
-            
-            // Update avatar
-            if (profile.avatar) {
-                profileAvatar.src = profile.avatar;
-                navAvatar.src = profile.avatar;
-            }
-            
-            // Update nav display
-            document.getElementById('navUserName').textContent = profile.name || 'User';
-            document.getElementById('navUserRole').textContent = profile.role || 'User';
-            
-            // Update stats
-            updateStats(profile);
-            
-            console.log('✅ Profile loaded from backend');
-        } else {
-            console.log('⚠️ Backend profile not found, using token data');
-            loadFromLocalStorage();
-        }
-        
-        // Update bio count
-        updateBioCount();
-        
-    } catch (error) {
-        console.error('❌ Error loading profile:', error);
-        loadFromLocalStorage();
-    }
-}
+  if (!currentUser) return;
 
+
+  try {
+    console.log('📥 Fetching profile from backend...');
+    const response = await fetch(`${AUTH_BASE}?action=get-profile&email=${encodeURIComponent(currentUser.email)}`);
+    const result = await response.json();
+
+    if (result.ok && result.profile) {
+      const profile = result.profile;
+      // ... fill form & avatar & stats như anh đang làm ...
+    } else {
+      console.log('⚠️ Backend profile not found, dùng localStorage');
+      loadFromLocalStorage();
+    }
+
+    updateBioCount();
+  } catch (error) {
+    console.error('❌ Error loading profile:', error);
+    loadFromLocalStorage();
+  } finally {
+    
+  }
+}
 function loadFromLocalStorage() {
     emailInput.value = currentUser.email || '';
     roleInput.value = currentUser.role || 'User';

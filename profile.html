@@ -1,30 +1,73 @@
 <!DOCTYPE html>
 <html lang="vi">
+<<<<<<< HEAD
+=======
+
+>>>>>>> f2ad2d2 (update 13.11.2025)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ - Cphaco.app</title>
+<<<<<<< HEAD
     <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
     <link rel="icon" type="image/png" sizes="16x16" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/FzqRG7Kp/CPH-LOGO-1.png?v=2">
     <meta name="theme-color" content="#0ea5e9">
+=======
+    <link rel="icon" type="image/png" href="/assets/CPH-LOGO-1.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/CPH-LOGO-1.png">
+    <meta name="theme-color" content="#0A5BFF">
+>>>>>>> f2ad2d2 (update 13.11.2025)
     <meta name="description" content="Quản lý hồ sơ cá nhân - Cphaco.app">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="profile.css">
 </head>
+<<<<<<< HEAD
 <body>
+=======
+
+<body>
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-content">
+            <div class="loader-logo">
+                <div class="logo-circle"></div>
+                <div class="logo-circle"></div>
+                <div class="logo-circle"></div>
+                <div class="loader-spinner"></div>
+            </div>
+            <div class="loader-text">Đang tải...</div>
+        </div>
+    </div>
+
+    <!-- Loading Backdrop -->
+    <div class="loading-backdrop" id="loadingBackdrop">
+        <div class="loading-backdrop-content">
+            <div class="loading-backdrop-spinner"></div>
+            <p class="loading-backdrop-text" id="loadingBackdropText">Đang xử lý...</p>
+        </div>
+    </div>
+>>>>>>> f2ad2d2 (update 13.11.2025)
     <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-left">
                 <a href="dashboard.html" class="back-link">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+<<<<<<< HEAD
                         <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+=======
+                        <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+>>>>>>> f2ad2d2 (update 13.11.2025)
                     </svg>
                     Quay lại Dashboard
                 </a>
             </div>
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> f2ad2d2 (update 13.11.2025)
             <div class="nav-right">
                 <div class="user-menu">
                     <img src="https://i.pravatar.cc/100?img=12" alt="User Avatar" class="user-avatar" id="navAvatar">
@@ -52,11 +95,23 @@
                 <div class="profile-sidebar">
                     <div class="avatar-section">
                         <div class="avatar-wrapper">
+<<<<<<< HEAD
                             <img src="https://i.pravatar.cc/200?img=12" alt="Avatar" class="profile-avatar" id="profileAvatar">
                             <div class="avatar-overlay">
                                 <label for="avatarInput" class="avatar-upload-btn">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+=======
+                            <img src="https://i.pravatar.cc/200?img=12" alt="Avatar" class="profile-avatar"
+                                id="profileAvatar">
+                            <div class="avatar-overlay">
+                                <label for="avatarInput" class="avatar-upload-btn">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                        </path>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                         <circle cx="12" cy="13" r="4"></circle>
                                     </svg>
                                     <span>Đổi ảnh</span>
@@ -64,11 +119,22 @@
                                 <input type="file" id="avatarInput" accept="image/*" hidden>
                             </div>
                         </div>
+<<<<<<< HEAD
                         
                         <div class="avatar-actions">
                             <button class="btn-secondary" id="removeAvatarBtn">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z"></path>
+=======
+
+                        <div class="avatar-actions">
+                            <button class="btn-secondary" id="removeAvatarBtn">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z">
+                                    </path>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </svg>
                                 Xóa ảnh
                             </button>
@@ -77,8 +143,14 @@
                         <div class="avatar-info">
                             <p class="info-text">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+<<<<<<< HEAD
                                     <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
                                     <path d="M8 11V8M8 5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+=======
+                                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M8 11V8M8 5h.01" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" />
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </svg>
                                 JPG, PNG hoặc GIF. Tối đa 5MB.
                             </p>
@@ -109,13 +181,18 @@
                         <!-- Personal Information -->
                         <div class="form-section">
                             <h2 class="section-title">Thông tin cá nhân</h2>
+<<<<<<< HEAD
                             
+=======
+
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="fullName" class="form-label">
                                         Họ và tên
                                         <span class="required">*</span>
                                     </label>
+<<<<<<< HEAD
                                     <input 
                                         type="text" 
                                         id="fullName" 
@@ -123,6 +200,10 @@
                                         placeholder="Nguyễn Văn A"
                                         required
                                     >
+=======
+                                    <input type="text" id="fullName" class="form-input" placeholder="Nguyễn Văn A"
+                                        required>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </div>
 
                                 <div class="form-group">
@@ -130,6 +211,7 @@
                                         Email
                                         <span class="badge-readonly">Chỉ đọc</span>
                                     </label>
+<<<<<<< HEAD
                                     <input 
                                         type="email" 
                                         id="email" 
@@ -137,51 +219,73 @@
                                         placeholder="email@example.com"
                                         readonly
                                     >
+=======
+                                    <input type="email" id="email" class="form-input" placeholder="email@example.com"
+                                        readonly>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="phone" class="form-label">Số điện thoại</label>
+<<<<<<< HEAD
                                     <input 
                                         type="tel" 
                                         id="phone" 
                                         class="form-input" 
                                         placeholder="0912 345 678"
                                     >
+=======
+                                    <input type="tel" id="phone" class="form-input" placeholder="0912 345 678">
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </div>
 
                                 <div class="form-group">
                                     <label for="birthDate" class="form-label">Ngày sinh</label>
+<<<<<<< HEAD
                                     <input 
                                         type="date" 
                                         id="birthDate" 
                                         class="form-input"
                                     >
+=======
+                                    <input type="date" id="birthDate" class="form-input">
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="address" class="form-label">Địa chỉ</label>
+<<<<<<< HEAD
                                 <input 
                                     type="text" 
                                     id="address" 
                                     class="form-input" 
                                     placeholder="123 Đường ABC, Quận XYZ, TP.HCM"
                                 >
+=======
+                                <input type="text" id="address" class="form-input"
+                                    placeholder="123 Đường ABC, Quận XYZ, TP.HCM">
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             </div>
                         </div>
 
                         <!-- Work Information -->
                         <div class="form-section">
                             <h2 class="section-title">Thông tin công việc</h2>
+<<<<<<< HEAD
                             
+=======
+
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="role" class="form-label">
                                         Chức vụ
                                         <span class="badge-readonly">Chỉ đọc</span>
                                     </label>
+<<<<<<< HEAD
                                     <input 
                                         type="text" 
                                         id="role" 
@@ -189,6 +293,9 @@
                                         placeholder="Nhân viên"
                                         readonly
                                     >
+=======
+                                    <input type="text" id="role" class="form-input" placeholder="Nhân viên" readonly>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </div>
 
                                 <div class="form-group">
@@ -196,6 +303,7 @@
                                         Chi nhánh
                                         <span class="badge-readonly">Chỉ đọc</span>
                                     </label>
+<<<<<<< HEAD
                                     <input 
                                         type="text" 
                                         id="branch" 
@@ -203,6 +311,10 @@
                                         placeholder="Chi nhánh Hà Nội"
                                         readonly
                                     >
+=======
+                                    <input type="text" id="branch" class="form-input" placeholder="Chi nhánh Hà Nội"
+                                        readonly>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                 </div>
                             </div>
 
@@ -211,6 +323,7 @@
                                     Phòng ban
                                     <span class="badge-readonly">Chỉ đọc</span>
                                 </label>
+<<<<<<< HEAD
                                 <input 
                                     type="text" 
                                     id="department" 
@@ -218,13 +331,21 @@
                                     placeholder="Phòng Kinh doanh"
                                     readonly
                                 >
+=======
+                                <input type="text" id="department" class="form-input" placeholder="Phòng Kinh doanh"
+                                    readonly>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             </div>
                         </div>
 
                         <!-- Bio -->
                         <div class="form-section">
                             <h2 class="section-title">Giới thiệu</h2>
+<<<<<<< HEAD
                             
+=======
+
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             <div class="form-group">
                                 <label for="bio" class="form-label">
                                     Về bạn
@@ -232,6 +353,7 @@
                                         <span id="bioCount">0</span>/500
                                     </span>
                                 </label>
+<<<<<<< HEAD
                                 <textarea 
                                     id="bio" 
                                     class="form-textarea" 
@@ -239,6 +361,10 @@
                                     maxlength="500"
                                     placeholder="Viết vài dòng giới thiệu về bản thân..."
                                 ></textarea>
+=======
+                                <textarea id="bio" class="form-textarea" rows="4" maxlength="500"
+                                    placeholder="Viết vài dòng giới thiệu về bản thân..."></textarea>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             </div>
                         </div>
 
@@ -248,8 +374,16 @@
                                 Hủy
                             </button>
                             <button type="submit" class="btn-primary" id="saveBtn">
+<<<<<<< HEAD
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M13.333 14H2.667A1.333 1.333 0 0 1 1.333 12.667V3.333A1.333 1.333 0 0 1 2.667 2h8L14 5.333v7.334A1.333 1.333 0 0 1 13.333 14Z"></path>
+=======
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M13.333 14H2.667A1.333 1.333 0 0 1 1.333 12.667V3.333A1.333 1.333 0 0 1 2.667 2h8L14 5.333v7.334A1.333 1.333 0 0 1 13.333 14Z">
+                                    </path>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                                     <path d="M11.333 14v-5.333H4.667V14M4.667 2v3.333h6"></path>
                                 </svg>
                                 Lưu thay đổi
@@ -268,7 +402,11 @@
                 <h3>Cắt ảnh đại diện</h3>
                 <button class="close-btn" id="closeCropModal">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+<<<<<<< HEAD
                         <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+=======
+                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+>>>>>>> f2ad2d2 (update 13.11.2025)
                     </svg>
                 </button>
             </div>
@@ -278,20 +416,38 @@
                 </div>
                 <div class="crop-controls">
                     <button type="button" class="control-btn" id="rotateLeftBtn">
+<<<<<<< HEAD
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+=======
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             <path d="M2.5 10A7.5 7.5 0 0 1 17.5 10M17.5 10L14.167 6.667M17.5 10l-3.333 3.333"></path>
                         </svg>
                         Xoay trái
                     </button>
                     <button type="button" class="control-btn" id="rotateRightBtn">
+<<<<<<< HEAD
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+=======
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+>>>>>>> f2ad2d2 (update 13.11.2025)
                             <path d="M17.5 10A7.5 7.5 0 0 0 2.5 10M2.5 10l3.333-3.333M2.5 10l3.333 3.333"></path>
                         </svg>
                         Xoay phải
                     </button>
                     <button type="button" class="control-btn" id="flipBtn">
+<<<<<<< HEAD
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
                             <path d="M5 2.5v15M5 2.5l3.333 3.333M5 2.5L1.667 5.833M15 2.5v15M15 2.5l3.333 3.333M15 2.5l-3.333 3.333"></path>
+=======
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path
+                                d="M5 2.5v15M5 2.5l3.333 3.333M5 2.5L1.667 5.833M15 2.5v15M15 2.5l3.333 3.333M15 2.5l-3.333 3.333">
+                            </path>
+>>>>>>> f2ad2d2 (update 13.11.2025)
                         </svg>
                         Lật ngang
                     </button>
@@ -314,12 +470,25 @@
     <!-- Success Toast -->
     <div class="toast success-toast" id="successToast">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+<<<<<<< HEAD
             <circle cx="10" cy="10" r="9" fill="#10b981"/>
             <path d="M6 10l2.5 2.5L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+=======
+            <circle cx="10" cy="10" r="9" fill="#10b981" />
+            <path d="M6 10l2.5 2.5L14 7" stroke="white" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+>>>>>>> f2ad2d2 (update 13.11.2025)
         </svg>
         <span id="toastMessage">Cập nhật thành công!</span>
     </div>
 
     <script src="profile.js"></script>
+<<<<<<< HEAD
 </body>
 </html>
+=======
+    <script src="profile-loading.js"></script>
+</body>
+
+</html>
+>>>>>>> f2ad2d2 (update 13.11.2025)

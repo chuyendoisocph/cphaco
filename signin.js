@@ -79,105 +79,149 @@ if (togglePassword && passwordInput) {
 /**
  * Đăng nhập bằng email và password
  */
-async function loginWithPassword({email, password, app, returnTo}) {
-    try {
-        const response = await fetch(AUTH_BASE, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: JSON.stringify({
-                action: 'login',
-                email: email,
-                password: password,
-                app: app,
-                returnTo: returnTo
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (!data.ok) {
-            throw new Error(data.error || 'Email hoặc mật khẩu không đúng');
-        }
-        
-        // Lưu token vào localStorage
-        if (data.token) {
-            try {
-                localStorage.setItem(TOKEN_KEY, data.token);
-                
-                // Parse token để lưu thêm thông tin user
-                const userInfo = parseJWT(data.token);
-                localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
-                
-                console.log('✅ Login successful:', userInfo);
-                
-            } catch (e) {
-                console.error('Error saving token:', e);
-            }
-        }
-        
-        // Trả về URL redirect (mặc định là dashboard.html)
-        return data.redirect || returnTo || 'dashboard.html';
-        
-    } catch (error) {
-        console.error('Login error:', error);
-        throw error;
+async function loginWithPassword({ email, password, app, returnTo }) {
+  try {
+    // Dùng form-urlencode để tránh preflight & để GAS parse chuẩn
+    const body = new URLSearchParams({
+      action: 'login',
+      email,
+      password,
+      app: app || APP_ID || 'PORTAL',
+      returnTo: returnTo || 'dashboard.html'
+    });
+
+    const response = await fetch(AUTH_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: body.toString()
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || 'Email hoặc mật khẩu không đúng');
     }
+
+    // Lưu token (nếu server trả về)
+    if (data.token) {
+      try {
+        localStorage.setItem(TOKEN_KEY, data.token);
+        const userInfo = parseJWT(data.token);
+        localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
+        console.log('✅ Login successful:', userInfo);
+      } catch (e) {
+        console.error('Error saving token:', e);
+      }
+    }
+
+    // Trả về URL redirect dạng string
+    return data.redirect || returnTo || 'dashboard.html';
+
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
 }
 
-/**
- * Parse JWT token (client-side, không verify signature)
- */
-function parseJWT(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
-            '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        ).join(''));
-        return JSON.parse(jsonPayload);
-    } catch (error) {
-        console.error('Parse JWT error:', error);
-        return {};
-    }
+
+// ==== JWT utils (Base64URL-safe) ====
+// (Đặt trước mọi chỗ dùng parseJWT)
+
+function toBase64(b64url) {
+  let s = String(b64url || '').replace(/-/g, '+').replace(/_/g, '/').trim();
+  const pad = s.length % 4;
+  if (pad) s += '='.repeat(4 - pad);
+  return s;
 }
+
+function b64urlDecodeUtf8(b64url) {
+  const b64 = toBase64(b64url);
+  const bin = atob(b64);
+  // Ưu tiên TextDecoder (chuẩn UTF-8)
+  if (typeof TextDecoder !== 'undefined') {
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  // Fallback (ít chuẩn nhưng đủ cho ASCII)
+  try { return decodeURIComponent(escape(bin)); } catch { return bin; }
+}
+
+function normalizeToken(raw) {
+  if (!raw) return '';
+  let t = String(raw).trim().replace(/^"|"$/g, '');
+  if (t.startsWith('Bearer ')) t = t.slice(7).trim();
+  try {
+    const dec = decodeURIComponent(t);
+    if (dec.split('.').length === 3) t = dec;
+  } catch (_) {}
+  return t.replace(/\s+/g, '');
+}
+
+function parseJWT(token) {
+  const t = normalizeToken(token);
+  const parts = t.split('.');
+  if (parts.length !== 3) throw new Error('Invalid JWT format');
+  // Decode header/payload theo Base64URL
+  const header  = JSON.parse(b64urlDecodeUtf8(parts[0]));
+  const payload = JSON.parse(b64urlDecodeUtf8(parts[1]));
+  // (Tuỳ chọn) kiểm tra alg
+  if (header.alg && header.alg !== 'HS256') {
+    console.warn('Unexpected JWT alg:', header.alg);
+  }
+  return payload;
+}
+
+
+
+
 
 /**
  * Verify 2FA code
  */
-async function verify2FA({email, code, tempToken, app, returnTo}) {
-    try {
-        const response = await fetch(AUTH_BASE, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: JSON.stringify({
-                action: 'verify-2fa',
-                email: email,
-                code: code,
-                tempToken: tempToken,
-                app: app,
-                returnTo: returnTo
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (!data.ok) {
-            throw new Error(data.error || 'Mã 2FA không chính xác');
-        }
-        
-        console.log('✅ 2FA verification successful');
-        
-        return data;
-        
-    } catch (error) {
-        console.error('2FA verification error:', error);
-        throw error;
+async function verify2FA({ email, code, tempToken, app, returnTo }) {
+  try {
+    const body = new URLSearchParams({
+      action: 'verify-2fa',
+      email,
+      code,
+      tempToken,
+      app: app || APP_ID || 'PORTAL',
+      returnTo: returnTo || 'dashboard.html'
+    });
+
+    const response = await fetch(AUTH_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: body.toString()
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || 'Mã 2FA không chính xác');
     }
+
+    // Nếu server trả token ở bước 2FA, lưu luôn
+    if (data.token) {
+      try {
+        persistToken(data.token)
+        const userInfo = parseJWT(data.token);
+        localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
+        console.log('✅ 2FA verification successful:', userInfo);
+      } catch (e) {
+        console.error('Error saving token:', e);
+      }
+    }
+
+    return data; // có data.redirect
+  } catch (error) {
+    console.error('2FA verification error:', error);
+    throw error;
+  }
 }
+
+
 
 // ===== FORM SUBMISSION =====
 
@@ -269,10 +313,20 @@ signinForm.addEventListener('submit', async function(e) {
                 localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
             }
             
-            redirectUrl = verify2FAResponse.redirect || returnTo;
+              redirectUrl = (verify2FAResponse && typeof verify2FAResponse.redirect === 'string' && verify2FAResponse.redirect.trim())
+    ? verify2FAResponse.redirect
+    : returnTo;
         } else {
             // No 2FA required - response is the redirect URL string
-            redirectUrl = loginResponse || returnTo;
+            // Không 2FA: lưu token + lấy redirect chính xác
+    if (loginResponse.token) {
+        localStorage.setItem(TOKEN_KEY, loginResponse.token);
+        const userInfo = parseJWT(loginResponse.token);
+        localStorage.setItem('CP_USER_INFO', JSON.stringify(userInfo));
+    }
+      redirectUrl = (typeof loginResponse === 'string' && loginResponse.trim())
+    ? loginResponse
+    : returnTo;
         }
         
         // Remember email if checkbox is checked
@@ -288,6 +342,8 @@ signinForm.addEventListener('submit', async function(e) {
         
         // Redirect after 1 second
         setTimeout(() => {
+            redirectUrl = (typeof redirectUrl === 'string' && redirectUrl.trim()) ? redirectUrl : 'dashboard.html';
+
             window.location.href = redirectUrl;
         }, 1000);
         
@@ -351,12 +407,12 @@ window.addEventListener('load', function() {
                 return;
             } else {
                 // Token expired, remove it
-                localStorage.removeItem(TOKEN_KEY);
+                //localStorage.removeItem(TOKEN_KEY);
                 localStorage.removeItem('CP_USER_INFO');
             }
         } catch (e) {
             console.error('Invalid token:', e);
-            localStorage.removeItem(TOKEN_KEY);
+           // localStorage.removeItem(TOKEN_KEY);
             localStorage.removeItem('CP_USER_INFO');
         }
     }

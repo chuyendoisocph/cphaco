@@ -662,3 +662,402 @@
 .overlay.active {
     display: block;
 }
+<<<<<<< HEAD
+=======
+
+/* ========================================
+   PAGE LOADING - GAMMAS STYLE
+   ======================================== */
+
+.page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #0066FF 0%, #00C9FF 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10002;
+    opacity: 1;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.page-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-content {
+    text-align: center;
+    animation: fadeInUp 0.6s ease;
+}
+
+/* Gammas Logo Animation */
+.loader-logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    position: relative;
+}
+
+.logo-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.logo-circle:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.logo-circle:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.loader-spinner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+.loader-text {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   SKELETON LOADING
+   ======================================== */
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0%,
+        #f8f8f8 50%,
+        #f0f0f0 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Skeleton variants */
+.skeleton-avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+}
+
+.skeleton-button {
+    height: 44px;
+    border-radius: 8px;
+}
+
+.skeleton-input {
+    height: 48px;
+    border-radius: 8px;
+}
+
+.skeleton-textarea {
+    height: 100px;
+    border-radius: 8px;
+}
+
+.skeleton-text {
+    height: 20px;
+    border-radius: 4px;
+}
+
+.skeleton-text.small {
+    height: 16px;
+    width: 60%;
+}
+
+.skeleton-title {
+    height: 32px;
+    width: 200px;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-stat {
+    height: 48px;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+/* Hide real content when loading */
+.loading-state .profile-avatar,
+.loading-state .form-input,
+.loading-state .form-textarea,
+.loading-state .btn-primary,
+.loading-state .btn-secondary,
+.loading-state .stat-item {
+    visibility: hidden;
+}
+
+/* ========================================
+   FADE IN ANIMATIONS
+   ======================================== */
+
+.fade-in {
+    animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.6s ease;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.6s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-up {
+    animation: slideInUp 0.6s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animations for list items */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ========================================
+   LOADING STATES FOR COMPONENTS
+   ======================================== */
+
+/* Avatar loading */
+.avatar-section.loading .avatar-wrapper {
+    position: relative;
+}
+
+.avatar-section.loading .avatar-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmerOverlay 1.5s ease-in-out infinite;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+@keyframes shimmerOverlay {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Form loading */
+.form-section.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.form-section.loading .form-input,
+.form-section.loading .form-textarea {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0%,
+        #f8f8f8 50%,
+        #f0f0f0 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-color: transparent;
+}
+
+/* Stats loading */
+.profile-stats.loading .stat-value {
+    display: inline-block;
+    width: 60px;
+    height: 16px;
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0%,
+        #f8f8f8 50%,
+        #f0f0f0 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+/* ========================================
+   CONTENT LOADING SPINNER
+   ======================================== */
+
+.content-loader {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+}
+
+.content-loader.active {
+    display: flex;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f3f4f6;
+    border-top-color: #0066FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.spinner.small {
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+}
+
+/* ========================================
+   LOADING BACKDROP
+   ======================================== */
+
+.loading-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-backdrop.active {
+    display: flex;
+}
+
+.loading-backdrop-content {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.loading-backdrop-spinner {
+    width: 56px;
+    height: 56px;
+    border: 5px solid #f3f4f6;
+    border-top-color: #0066FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.loading-backdrop-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+>>>>>>> f2ad2d2 (update 13.11.2025)
