@@ -52,7 +52,6 @@ const overlay = document.getElementById('overlay');
 // ===== INITIALIZATION =====
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Profile page loaded');
     
    console.log('🚀 Profile page loaded');
 
