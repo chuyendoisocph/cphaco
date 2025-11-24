@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Fix - Tools & Helpers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .tool-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .tool-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tool-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .bookmarklet {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: move;
+        }
+        
+        .bookmarklet:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .instruction {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .copy-btn {
+            background: #10b981;
+            font-size: 14px;
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #059669;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .emoji {
+            font-size: 1.3em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Avatar Fix Tools</h1>
+            <p>Công cụ hỗ trợ triển khai và debug avatar system</p>
+        </div>
+
+        <div class="content">
+            <!-- BOOKMARKLETS SECTION -->
+            <div class="section">
+                <h2><span class="emoji">🔖</span> Bookmarklets</h2>
+                
+                <div class="tool-card">
+                    <h3>
+                        <span class="emoji">🧹</span>
+                        Clear Avatar Cache
+                        <span class="badge badge-success">KHUYẾN NGHỊ</span>
+                    </h3>
+                    <p>Xóa avatar cache từ localStorage. Drag link này vào Bookmarks bar của browser:</p>
+                    <a href="javascript:(function(){try{const p=JSON.parse(localStorage.getItem('userProfile')||'{}');if(p.avatar){delete p.avatar;localStorage.setItem('userProfile',JSON.stringify(p));alert('✅ Avatar cache cleared!\n\nReload page to see changes.');}else{alert('✅ No avatar cache found.');}}catch(e){alert('❌ Error: '+e.message);}})();" class="bookmarklet">
+                        Clear Avatar Cache
+                    </a>
+                    <div class="instruction">
+                        <strong>Cách dùng:</strong>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Drag link màu xanh vào Bookmarks bar</li>
+                            <li>Mở trang Profile</li>
+                            <li>Click bookmark</li>
+                            <li>Reload trang</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h3>
+                        <span class="emoji">🔍</span>
+                        Check Avatar Status
+                        <span class="badge badge-info">DEBUG</span>
+                    </h3>
+                    <p>Kiểm tra trạng thái avatar trong localStorage và trên trang:</p>
+                    <a href="javascript:(function(){const p=JSON.parse(localStorage.getItem('userProfile')||'{}');const img=document.getElementById('profileAvatar');const result=`LOCALSTORAGE:\nHas avatar: ${!!p.avatar}\n${p.avatar?'Type: '+(p.avatar.startsWith('data:image')?'BASE64':'URL'):''}\n\nCURRENT PAGE:\nAvatar src: ${img?img.src.substring(0,60)+'...':'Not found'}`;alert(result);console.log('Full localStorage:',p);console.log('Avatar element:',img);})();" class="bookmarklet">
+                        Check Avatar Status
+                    </a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>
+                        <span class="emoji">🗑️</span>
+                        Clear All Cache
+                        <span class="badge badge-warning">NUCLEAR</span>
+                    </h3>
+                    <p>Xóa TẤT CẢ cache (userProfile, userStats, và mọi thứ khác):</p>
+                    <a href="javascript:(function(){if(confirm('⚠️ Xóa TẤT CẢ cache?\n\nBạn sẽ cần login lại.')){localStorage.clear();sessionStorage.clear();alert('✅ All cache cleared!\n\nReload to login again.');location.reload();}})();" class="bookmarklet">
+                        Clear All Cache
+                    </a>
+                </div>
+            </div>
+
+            <!-- CONSOLE COMMANDS SECTION -->
+            <div class="section">
+                <h2><span class="emoji">💻</span> Console Commands</h2>
+                
+                <div class="tool-card">
+                    <h3>Command 1: Clear Avatar Cache</h3>
+                    <p>Copy và paste vào Console (F12 → Console):</p>
+                    <div class="code-block" id="cmd1">// Xóa avatar cache
+const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+if (profile.avatar) {
+    delete profile.avatar;
+    localStorage.setItem('userProfile', JSON.stringify(profile));
+    console.log('✅ Avatar cache cleared!');
+} else {
+    console.log('✅ No avatar cache found.');
+}
+
+// Reload trang
+location.reload();</div>
+                    <button class="copy-btn" onclick="copyToClipboard('cmd1')">📋 Copy</button>
+                </div>
+
+                <div class="tool-card">
+                    <h3>Command 2: Check Cache Status</h3>
+                    <div class="code-block" id="cmd2">// Check localStorage
+console.log('=== LOCALSTORAGE ===');
+const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+console.log('Profile keys:', Object.keys(profile));
+console.log('Has avatar:', !!profile.avatar);
+if (profile.avatar) {
+    console.log('Avatar type:', profile.avatar.startsWith('data:image') ? 'BASE64' : 'URL');
+    console.log('Avatar length:', profile.avatar.length);
+}
+
+// Check current page
+console.log('\n=== CURRENT PAGE ===');
+const img = document.getElementById('profileAvatar');
+console.log('Avatar src:', img?.src);</div>
+                    <button class="copy-btn" onclick="copyToClipboard('cmd2')">📋 Copy</button>
+                </div>
+
+                <div class="tool-card">
+                    <h3>Command 3: Test Backend API</h3>
+                    <div class="code-block" id="cmd3">// Test get-profile API
+const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbznIRGMSTXrOdR2-Vl93rLOJyB_voqRsJVietzSqWMywiAJjBaMw_EKL5HD0lL9yw/exec';
+
+// Thay YOUR_EMAIL bằng email của bạn
+const email = 'YOUR_EMAIL@example.com';
+
+fetch(`${AUTH_BASE}?action=get-profile&email=${encodeURIComponent(email)}`)
+    .then(r => r.json())
+    .then(data => {
+        console.log('=== BACKEND RESPONSE ===');
+        console.log('Status:', data.ok ? '✅ OK' : '❌ ERROR');
+        if (data.profile) {
+            console.log('Has avatar:', !!data.profile.avatar);
+            console.log('Avatar value:', data.profile.avatar?.substring(0, 100) + '...');
+        } else {
+            console.error('No profile returned:', data);
+        }
+    })
+    .catch(e => console.error('❌ Error:', e));</div>
+                    <button class="copy-btn" onclick="copyToClipboard('cmd3')">📋 Copy</button>
+                </div>
+            </div>
+
+            <!-- VERIFICATION SECTION -->
+            <div class="section">
+                <h2><span class="emoji">✅</span> Verification Checklist</h2>
+                
+                <div class="success-box">
+                    <strong>Sau khi deploy, verify các điểm sau:</strong>
+                    <ul style="margin-left: 25px; margin-top: 10px; line-height: 2;">
+                        <li>✅ File <code>profile.js</code> đã được thay bằng <code>profile-COMPLETE-FIX.js</code></li>
+                        <li>✅ localStorage đã được clear (không có field "avatar")</li>
+                        <li>✅ Console show: "Avatar loaded from backend: https://lh3..."</li>
+                        <li>✅ Google Sheet có Drive URL (không phải base64)</li>
+                        <li>✅ Upload ảnh mới → Save → Reload → Ảnh thay đổi</li>
+                    </ul>
+                </div>
+
+                <div class="tool-card">
+                    <h3>Quick Test Script</h3>
+                    <p>Chạy script này để verify toàn bộ system:</p>
+                    <div class="code-block" id="cmd4">console.log('🔍 AVATAR SYSTEM VERIFICATION\n');
+
+// Check 1: localStorage
+console.log('1️⃣ CHECK LOCALSTORAGE');
+const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+const hasAvatarCache = !!profile.avatar;
+console.log(hasAvatarCache ? '❌ FAIL: Avatar found in cache' : '✅ PASS: No avatar in cache');
+
+// Check 2: Current page
+console.log('\n2️⃣ CHECK CURRENT PAGE');
+const img = document.getElementById('profileAvatar');
+const imgSrc = img?.src || '';
+if (imgSrc.includes('lh3.googleusercontent.com')) {
+    console.log('✅ PASS: Showing Drive URL');
+} else if (imgSrc.startsWith('data:image')) {
+    console.log('❌ FAIL: Showing BASE64');
+} else {
+    console.log('⚠️ WARNING: Showing default/other URL');
+}
+
+// Check 3: Console logs
+console.log('\n3️⃣ EXPECTED CONSOLE LOGS');
+console.log('Look for: "✅ Avatar loaded from backend: https://lh3..."');
+console.log('Should NOT see: "⚠️ Loading from localStorage"');
+
+console.log('\n📊 VERIFICATION COMPLETE');</div>
+                    <button class="copy-btn" onclick="copyToClipboard('cmd4')">📋 Copy</button>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS SECTION -->
+            <div class="section">
+                <h2><span class="emoji">🔗</span> Quick Links</h2>
+                
+                <div class="tool-card">
+                    <h3>Google Drive Folder</h3>
+                    <p>Xem tất cả avatar đã upload:</p>
+                    <a href="https://drive.google.com/drive/folders/1FHXbAZwyQDsflq0bW5rfjP08g2nvuTmP" target="_blank" class="bookmarklet">
+                        Open Drive Folder
+                    </a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>Google Sheet (USERS)</h3>
+                    <p>Xem dữ liệu trong database:</p>
+                    <a href="https://docs.google.com/spreadsheets/d/190KTfaRU56bYOU9E_EhM7GTyBXommqbJ0SFkF1pqXoY/edit#gid=0" target="_blank" class="bookmarklet">
+                        Open Google Sheet
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Avatar Fix Tools v1.0</strong></p>
+            <p>Tạo bởi Claude • <a href="DEPLOYMENT-GUIDE.md" style="color: #667eea;">Xem hướng dẫn đầy đủ</a></p>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Show success feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                alert('Không thể copy. Vui lòng copy thủ công.');
+            });
+        }
+    </script>
+</body>
+</html>

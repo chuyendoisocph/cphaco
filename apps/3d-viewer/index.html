@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Viewer • CPHACO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../../assets/CPH-LOGO-1.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <img src="../../assets/CPH-LOGO-1.png" alt="CPHACO Logo" height="48">
+        <span class="nav-brand">CPHACO</span>
+      </div>
+      <div class="nav-links">
+        <a href="../../index.html" class="nav-link">Trang chủ</a>
+        <a href="../../index.html#apps" class="nav-link">Ứng dụng</a>
+        <a href="../../index.html#about" class="nav-link">Về chúng tôi</a>
+        <a href="../../signin.html" class="nav-link-cta">Đăng nhập</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+      </div>
+
+      <div class="container hero-inner">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-icon">✨</span>
+            Trải nghiệm xem mẫu mộ 3D theo thời gian thực
+          </div>
+
+          <h1 class="hero-title">
+            Studio <span class="gradient-text">3D sản phẩm</span><br />
+            dành riêng cho <span class="gradient-text">CPHACO</span>
+          </h1>
+
+          <p class="hero-description">
+            Xoay, zoom, bật tắt từng lớp cấu trúc mẫu mộ — ngay trên trình duyệt.
+            Dữ liệu lấy trực tiếp từ file SketchUp (glb) để bảo toàn kích thước và chất liệu.
+          </p>
+
+          <div class="hero-cta">
+            <button class="btn btn-primary" type="button" onclick="scrollToViewer()">
+              Bắt đầu xem 3D
+            </button>
+            <a href="/apps/ocm-hybrid/" class="btn btn-secondary" target="_blank">
+              Kết nối Bản đồ số OCM
+            </a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat">
+              <div class="stat-number">3D</div>
+              <div class="stat-label">Mẫu demo</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">Realtime</div>
+              <div class="stat-label">Xử lý trên browser</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">Trải nghiệm</div>
+              <div class="stat-label">Tương tác mượt mà</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="viewer-wrapper">
+          <section class="viewer-card-3d" id="viewerSection">
+            <header class="viewer-card-header">
+              <div>
+                <h2 class="viewer-card-title">Không gian 3D sản phẩm</h2>
+                <p class="viewer-card-subtitle">
+                  Giữ chuột trái để xoay · cuộn để zoom · chuột phải để pan.
+                </p>
+              </div>
+              <div class="viewer-card-chips">
+                <span class="chip-small">SketchUp → glb</span>
+              </div>
+            </header>
+
+            <div class="viewer-canvas-shell">
+              <canvas id="viewer"></canvas>
+              <div class="viewer-loading" id="loadingOverlay">
+                <div class="viewer-spinner"></div>
+                <div class="viewer-loading-text">Đang tải model 3D...</div>
+              </div>
+            </div>
+
+            <div class="viewer-controls-row">
+              <div class="viewer-block">
+                <div class="viewer-block-label">Chọn sản phẩm</div>
+                <div class="viewer-select-shell">
+                  <select id="productSelect">
+                    <option value="assets/models/product1.glb">Mẫu mộ 1</option>
+                    <option value="assets/models/product2.glb">Mẫu mộ 2</option>
+                    <option value="assets/models/product3.glb">Mẫu mộ 3</option>
+                    <option value="assets/models/product4.glb">Mẫu mộ 4</option>
+                    <option value="assets/models/product5.glb">Mẫu mộ 5</option>
+                    <option value="assets/models/product6.glb">Mẫu mộ 6</option>
+                    <option value="assets/models/product7.glb">Mẫu mộ 7</option>
+                    <option value="assets/models/product8.glb">Mẫu mộ 8</option>
+                  </select>
+                </div>
+
+                <div class="viewer-block-label viewer-block-label-inline">
+                  <span>Góc nhìn nhanh</span>
+                  <span class="viewer-block-hint">Preset camera</span>
+                </div>
+                <div class="viewer-view-buttons">
+                  <button data-view="front" class="btn-view is-active">Chính diện</button>
+                  <button data-view="iso" class="btn-view">3/4</button>
+                  <button data-view="top" class="btn-view">Từ trên</button>
+                </div>
+              </div>
+
+              <div class="viewer-block viewer-block-parts">
+                <div class="viewer-block-label viewer-block-label-inline">
+                  <span>Bộ phận</span>
+                  <span class="viewer-block-hint">Bật / tắt lớp</span>
+                </div>
+                <div class="viewer-parts-toolbar">
+                  <button id="btnPartsAll" class="btn-chip">Hiện tất cả</button>
+                  <button id="btnPartsNone" class="btn-chip">Ẩn tất cả</button>
+                </div>
+                <div id="partsContainer" class="viewer-parts-list"></div>
+              </div>
+            </div>
+
+            <footer class="viewer-meta-row">
+              <div class="viewer-meta-item">
+                <span class="viewer-meta-label">FPS</span>
+                <span class="viewer-meta-value" id="fpsLabel">—</span>
+              </div>
+              <div class="viewer-meta-item">
+                <span class="viewer-meta-label">Polygon</span>
+                <span class="viewer-meta-value" id="polyLabel">—</span>
+              </div>
+              <div class="viewer-meta-item">
+                <span class="viewer-meta-label">Model center</span>
+                <span class="viewer-meta-value" id="centerLabel">—</span>
+              </div>
+            </footer>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Tính năng nổi bật</h2>
+          <p class="section-description">
+            Công nghệ 3D tiên tiến giúp trực quan hóa sản phẩm một cách chân thực nhất
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Chất liệu chân thực</h3>
+            <p>Hiển thị vật liệu Granite, Đá cẩm thạch với độ chi tiết cao</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3>Tương tác trực quan</h3>
+            <p>Xoay 360°, zoom in/out, xem từ mọi góc độ theo ý muốn</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📐</div>
+            <h3>Kích thước chính xác</h3>
+            <p>Dữ liệu từ file SketchUp đảm bảo tỷ lệ và kích thước thật</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Tải nhanh</h3>
+            <p>Tối ưu hóa file 3D cho trải nghiệm mượt mà</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Bật/tắt từng lớp</h3>
+            <p>Kiểm soát hiển thị từng bộ phận để xem chi tiết cấu trúc</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💻</div>
+            <h3>Hoạt động mọi nơi</h3>
+            <p>Chạy trên mọi trình duyệt hiện đại, không cần cài đặt</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact" class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img style="width: 80px;" src="../../assets/CPH-LOGO-1.png" alt="CPHACO Logo">
+          <div class="footer-brand-name">Hoa Viên Nghĩa Trang Bình Dương</div>
+          <p class="footer-tagline">Giải pháp công nghệ cho nghĩa trang hiện đại</p>
+        </div>
+        
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Sản phẩm</h4>
+            <a href="../../index.html#apps">Ứng dụng</a>
+            <a href="../../index.html#about">Về chúng tôi</a>
+          </div>
+          
+          <div class="footer-column">
+            <h4>Liên hệ</h4>
+            <a href="mailto:contact@cphaco.vn">contact@cphaco.vn</a>
+            <a href="tel:+84818555444">+84 818 555 444</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2025 Cphaco. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="../../privacy.html">Privacy Policy</a>
+          <a href="../../terms.html">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./libs/three.module.js"
+    }
+  }
+  </script>
+
+  <script type="module" src="./app.js"></script>
+  
+  <script>
+    function scrollToViewer() {
+      document.getElementById('viewerSection').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  </script>
+</body>
+</html>

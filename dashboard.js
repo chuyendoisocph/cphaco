@@ -99,7 +99,7 @@ const APPS_DATABASE = {
         id: 'MAP001',
         name: 'Bản đồ số',
         description: 'Bản đồ số hoa viên OCM',
-        url: 'https://script.google.com/macros/s/AKfycbwKuTqXLyIkR8L5htnYDkHFi-HRIIdFo1dnL9XnMa-nIqmMLsdTvczEsVv1xD_Vn4_e/exec',
+        url: 'apps/ocm-hybrid/index.html',
         icon: '🗺️',
         color: 'linear-gradient(135deg, #f093fb, #f5576c)',
         status: 'active'

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+  <title>OCM Hybrid · Bản đồ số Hoa Viên</title>
+
+  <!-- Favicon / Font giống hệ cphaco.app -->
+  <link rel="icon" type="image/png" href="/assets/CPH-LOGO-1.png">
+  <link rel="apple-touch-icon" href="/assets/CPH-LOGO-1.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- MapLibre + Fuse -->
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+  <!-- CSS riêng của OCM -->
+  <link rel="stylesheet" href="ocm-hybrid.css">
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="top-bar">
+    <button class="gm-chip" id="btnMenu" title="Menu">☰</button>
+    <div class="gm-search-wrap">
+      <span style="opacity:.7">🔎</span>
+      <input id="searchInput" class="gm-search" type="text" placeholder="Tìm một địa điểm, lô mộ..." />
+      <div id="suggestList" class="suggest-list" role="listbox" aria-label="Gợi ý tìm kiếm"></div>
+    </div>
+    <div class="gm-right">
+      <button class="gm-chip" id="btnAccount" title="Tài khoản">👤</button>
+    </div>
+  </div>
+
+  <!-- ===== FLOATING BUTTONS ===== -->
+  <div class="fab-wrap">
+    <button class="fab fab-secondary" title="Lớp" onclick="toggleFilters()">☷</button>
+  </div>
+
+  <!-- ===== BOTTOM SHEET ===== -->
+  <div id="bottomSheet" class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div id="propertyList"></div>
+  </div>
+
+  <!-- ===== FILTER PANEL ===== -->
+  <div id="filterPanel" class="filter-panel">
+    <div class="filter-title">Lọc theo tình trạng</div>
+    <div class="filter-grid" id="statusChips"></div>
+
+    <div class="filter-title">Khu vực</div>
+    <div id="areaList" class="filter-grid">
+      <div class="filter-chip active area-chip" data-area="__ALL__">Tất cả</div>
+    </div>
+
+    <div class="filter-title">Lớp hiển thị</div>
+    <div class="filter-grid">
+      <div class="filter-chip active" id="layer-plots">Lô mộ</div>
+      <div class="filter-chip active" id="layer-labels">Nhãn</div>
+      <div class="filter-chip active" id="layer-overlays">Ảnh Overlay</div>
+      <div class="filter-chip" id="layer-satellite">Vệ tinh</div>
+    </div>
+  </div>
+  <div id="filterOverlay" onclick="hideFilterPanel()"></div>
+
+  <!-- ===== STATS ===== -->
+  <div class="stats">
+    <div class="stat-item">
+      <div id="totalCount" class="stat-value">-</div>
+      <div class="stat-label">Tổng</div>
+    </div>
+    <div class="stat-item">
+      <div id="availableCount" class="stat-value" style="color:#34C759">-</div>
+      <div class="stat-label">Trống</div>
+    </div>
+    <div class="stat-item">
+      <div id="soldCount" class="stat-value" style="color:var(--primary)">-</div>
+      <div class="stat-label">Đã bán</div>
+    </div>
+    <div class="stat-item">
+      <div id="reservedCount" class="stat-value" style="color:#FF9500">-</div>
+      <div class="stat-label">Đặt cọc</div>
+    </div>
+  </div>
+
+  <!-- ===== SIDE MENU ===== -->
+  <div id="sideMenu" class="side-menu" aria-hidden="true">
+    <div class="menu-header">
+      <img src="/assets/CPH-LOGO-1.png" alt="Logo" class="menu-logo">
+      <strong>Bản đồ số Hoa Viên</strong>
+      <small id="menuUserName" style="color:var(--primary)"></small>
+    </div>
+
+    <div class="menu-section-title">🪦 Huyệt mộ & Lô đất</div>
+    <div class="menu-item" onclick="centerMap()"><span class="icon">🗺️</span>Bản đồ tổng thể</div>
+    <div class="menu-item" onclick="toggleFilters()"><span class="icon">🔍</span>Lọc & tìm lô mộ</div>
+    <div class="menu-item" onclick="openGmPaste()"><span class="icon">📍</span>Dán link/toạ độ</div>
+    <div class="menu-item" onclick="showToast('📋 Danh sách lô mộ')"><span class="icon">📋</span>Danh sách lô mộ</div>
+    <div class="menu-item" onclick="showToast('📸 Ảnh thực tế')"><span class="icon">📸</span>Ảnh thực tế / Overlay</div>
+    <div class="menu-item" onclick="showToast('📐 Quy hoạch chi tiết')"><span class="icon">📐</span>Quy hoạch chi tiết</div>
+
+    <div class="menu-section-title">💬 Tư vấn & Bán hàng</div>
+    <div class="menu-item" onclick="showToast('🧾 Báo giá nhanh')"><span class="icon">💵</span>Báo giá nhanh</div>
+    <div class="menu-item" onclick="showToast('🧑‍🤝‍🧑 Tư vấn khách hàng')"><span class="icon">🧑‍🤝‍🧑</span>Tư vấn khách hàng</div>
+    <div class="menu-item" onclick="showToast('🗓️ Lịch hẹn / Đặt chỗ')"><span class="icon">🗓️</span>Lịch hẹn / Đặt chỗ</div>
+    <div class="menu-item" onclick="showToast('🪙 Gói dịch vụ / Ưu đãi')"><span class="icon">🪙</span>Gói dịch vụ / Ưu đãi</div>
+    <div class="menu-item" onclick="showToast('🚗 Dẫn đường tới lô')"><span class="icon">🚗</span>Dẫn đường tới lô</div>
+
+    <div class="menu-section-title">🧱 Quản lý & Nghiệp vụ</div>
+    <div class="menu-item" data-action="satellite" onclick="toggleLayerSatellite()">
+      <span class="icon">🛰️</span>Vệ tinh
+    </div>
+    <div class="menu-item" onclick="showToast('🧰 Công cụ đo đạc')"><span class="icon">🧰</span>Công cụ đo đạc</div>
+    <div class="menu-item" onclick="showToast('📊 Báo cáo nhanh')"><span class="icon">📊</span>Báo cáo nhanh</div>
+    <div class="menu-item" onclick="toggleSpiritualSites()"><span class="icon">🕍</span>Công trình tâm linh</div>
+    <div class="menu-item" onclick="showToast('🏗️ Công trình đang thi công')"><span class="icon">🏗️</span>Công trình đang thi công</div>
+    <div class="menu-item" onclick="showToast('🔄 Đồng bộ dữ liệu')"><span class="icon">🔄</span>Đồng bộ dữ liệu</div>
+
+    <div class="menu-section-title">ℹ️ Thông tin & Hỗ Trợ</div>
+    <div class="menu-item" onclick="showToast('🏢 Giới thiệu Hoa Viên')"><span class="icon">🏢</span>Giới thiệu Hoa Viên</div>
+    <div class="menu-item" onclick="showToast('🕯️ Văn hóa & Nghi lễ')"><span class="icon">🕯️</span>Văn hóa & Nghi lễ</div>
+    <div class="menu-item" onclick="showToast('📖 Hướng dẫn sử dụng')"><span class="icon">📖</span>Hướng dẫn sử dụng</div>
+    <div class="menu-item" onclick="showToast('☎️ Liên hệ hỗ trợ')"><span class="icon">☎️</span>Liên hệ hỗ trợ</div>
+    <div class="menu-item" onclick="showToast('🔗 Liên kết nhanh')"><span class="icon">🔗</span>Liên kết nhanh</div>
+  </div>
+
+  <!-- PROFILE OVERLAY -->
+  <div id="profileOverlay" onclick="toggleProfile(false)"></div>
+  <div id="profilePanel" class="profile-panel" role="dialog" aria-modal="true" aria-labelledby="profName" style="display:none">
+    <div class="profile-head">
+      <div id="profAvatar" class="profile-avatar">?</div>
+      <div>
+        <div id="profName" class="profile-name">Đang tải…</div>
+        <div id="profBranch" class="profile-branch"></div>
+      </div>
+    </div>
+
+    <div class="profile-list">
+      <div class="profile-row">
+        <div class="k">Email</div>
+        <div id="profEmail" class="v">—</div>
+      </div>
+      <div class="profile-row">
+        <div class="k">Điện thoại</div>
+        <div id="profPhone" class="v">—</div>
+      </div>
+      <div class="profile-row">
+        <div class="k">Vai trò</div>
+        <div id="profRole" class="v">—</div>
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <button class="btn-outline" onclick="copyUserEmail()">📋 Copy email</button>
+      <button class="btn-outline" onclick="copySid()">🔑 Copy SID</button>
+      <button class="btn-danger" onclick="logout()">Đăng xuất</button>
+    </div>
+  </div>
+
+  <!-- QR MODAL -->
+  <div id="qrOverlay" onclick="if(event.target.id==='qrOverlay') hideQR()">
+    <div class="qr-card">
+      <button class="qr-close" onclick="hideQR()">✖</button>
+      <h3>Quét mã để dẫn đường</h3>
+      <img id="qrImg" class="qr-img" alt="QR code" />
+      <div id="qrUrlText" class="qr-link"></div>
+      <div class="qr-actions">
+        <button onclick="copyQRLink()">📋 Copy link</button>
+        <a id="qrOpenBtn" target="_blank">🚗 Mở Google Maps</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Maps paste widget -->
+  <div class="gmpaste-wrap" id="gmpaste-root" aria-live="polite"
+       onclick="if(event.target.id==='gmpaste-root') closeGmPaste()">
+    <div class="gmpaste">
+      <input id="gmaps-input" placeholder="Dán link Google Maps hoặc nhập toạ độ: 11.1720208, 106.6499036 … rồi nhấn Enter" />
+      <button class="gmpaste-btn gmpaste-btn--copy" id="gmaps-copy">Copy toạ độ</button>
+      <button class="gmpaste-btn gmpaste-btn--go"   id="gmaps-go">Tìm</button>
+      <button class="gmpaste-btn" onclick="closeGmPaste()" title="Đóng">✖</button>
+    </div>
+  </div>
+
+  <!-- JS chính -->
+  <script src="ocm-hybrid.js"></script>
+</body>
+</html>

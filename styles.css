@@ -815,3 +815,14 @@ html {
     background: var(--primary-blue);
     color: white;
 }
+
+.app-icon-3d {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 25px;      /* nếu icon tròn 40–48px thì cỡ này đẹp */
+  color: #ffffff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

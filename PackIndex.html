@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CPHACO · Public Pack (Web)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1220; --card:rgba(255,255,255,.06); --border:rgba(255,255,255,.12);
+    --text:#e6ecf8; --muted:#a8b3cf; --accent:#7aa2ff; --accent2:#9ef0ff; --ok:#42d392; --err:#ff6b6b;
+    --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);
+    background:
+      radial-gradient(1100px 600px at 10% -10%, rgba(122,162,255,.25), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(158,240,255,.20), transparent 60%),
+      radial-gradient(700px 700px at -10% 100%, rgba(255,122,144,.15), transparent 60%),
+      #0b1220;
+  }
+  .wrap{max-width:1100px; margin:36px auto 80px; padding:0 20px}
+  .hero{
+    padding:24px; border:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    border-radius:calc(var(--radius) + 4px); box-shadow:var(--shadow)
+  }
+  .badge{display:inline-block; font-size:12px; font-weight:700; color:#08101d;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    padding:4px 12px; border-radius:999px; letter-spacing:.2px}
+  h1{margin:10px 0 6px; font-size:28px}
+  p{margin:0; color:var(--muted)}
+  .grid{display:grid; grid-template-columns: repeat(12,1fr); gap:16px; margin-top:16px}
+  .card{grid-column: span 12; padding:18px; border:1px solid var(--border); background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow)}
+  @media(min-width:900px){ .col-4{grid-column: span 4} .col-8{grid-column: span 8} .col-6{grid-column: span 6} }
+  h2{margin:0 0 12px; font-size:18px}
+  .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+  label{font-size:12px; color:var(--muted)}
+  input,select,textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:12px;
+    background:rgba(255,255,255,.06); color:var(--text); outline:none
+  }
+  textarea{min-height:92px; resize:vertical}
+  .inline{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .btn{
+    display:inline-flex; gap:8px; align-items:center; padding:10px 14px; border-radius:12px; border:1px solid var(--border);
+    background:rgba(255,255,255,.06); color:var(--text); text-decoration:none; font-weight:600; cursor:pointer
+  }
+  .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#0b1220; border:0}
+  .btn.ok{background:linear-gradient(90deg,#42d392,#6be59f); color:#08140c; border:0}
+  .btn.warn{background:linear-gradient(90deg,#ffb020,#ffd262); color:#0f0f0f; border:0}
+  .btn:disabled{opacity:.6; cursor:not-allowed}
+  .small{font-size:12px; color:var(--muted)}
+  .mono{font-family: ui-monospace, Menlo, Consolas, monospace;}
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.08)}
+  th{color:#dbe6ff; text-align:left}
+  .thumb{width:120px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:#101827}
+  .hint{font-size:12px; color:var(--muted); margin-top:8px}
+  .right{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="inline">
+      <span class="badge">PUBLIC PACK · WEB</span>
+      <div id="authBox" class="inline right">
+        <div id="signinBtn"></div>
+        <button class="btn" id="signoutBtn" style="display:none">Đăng xuất</button>
+      </div>
+    </div>
+    <h1>Tạo “Bộ hồ sơ gửi khách” (Web, không GAS)</h1>
+    <p>Đăng nhập Google → đọc MASTER từ Sheets → xem trước thumbnail Drive → xuất 1 PDF tại client → (tuỳ chọn) tạo Google Slides.</p>
+
+    <div class="grid">
+      <div class="card col-8">
+        <h2>Truy cập nhanh</h2>
+        <div class="inline" id="quickLinks"></div>
+        <div class="hint">* Bật Sheets API + Drive API + Slides API; OAuth type Web cho domain cphaco.app</div>
+      </div>
+      <div class="card col-4">
+        <h2>Trạng thái</h2>
+        <div class="small" id="statusBox">Chưa đăng nhập.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:18px">
+    <div class="card col-6">
+      <h2>1) Theo KHU (nhanh)</h2>
+      <div class="row">
+        <div>
+          <label>KHU (ví dụ: G4, B3.4, G5.4)</label>
+          <input id="khuExact" placeholder="Nhập KHU chính xác"/>
+        </div>
+        <div>
+          <label>Tên PDF/Slides (để trống = auto)</label>
+          <input id="pdfNameKhu" placeholder="PublicPack_{KHU}"/>
+        </div>
+      </div>
+      <details style="margin-top:10px">
+        <summary>Tùy chọn bìa PDF/Slides</summary>
+        <div class="row" style="margin-top:10px">
+          <div><label>Tiêu đề</label><input id="coverTitleKhu" placeholder="Bộ hồ sơ gửi khách – {KHU}"/></div>
+          <div><label>Phụ đề</label><input id="coverSubtitleKhu" placeholder="CPHACO · Public Pack"/></div>
+        </div>
+        <label>Giới thiệu</label>
+        <textarea id="coverNoteKhu" placeholder="Tổng hợp: bảng giá, bản đồ/quy hoạch, hình ảnh & tài liệu liên quan."></textarea>
+      </details>
+      <div class="inline" style="margin-top:12px">
+        <button class="btn" id="btnDryRunKhu">Xem trước</button>
+        <button class="btn ok" id="btnPdfKhu">Xuất 1 PDF</button>
+        <button class="btn primary" id="btnSlidesKhu">Xuất Google Slides</button>
+      </div>
+    </div>
+
+    <div class="card col-6">
+      <h2>2) Bộ lọc nâng cao</h2>
+      <div class="row">
+        <div>
+          <label>KHU chứa</label>
+          <input id="khuContains" placeholder="VD: B3.4 / G5 / LONG-PHUNG"/>
+        </div>
+        <div>
+          <label>Từ khoá (tên/tags/ghi chú)</label>
+          <input id="textContains" placeholder="VD: LONG-PHUNG, SONG-THÂN…"/>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Loại (giữ Ctrl/Cmd để chọn nhiều)</label>
+          <select id="loaiIn" multiple size="6">
+            <option value="bang-gia">bang-gia</option>
+            <option value="ban-do">ban-do</option>
+            <option value="hinh-anh">hinh-anh</option>
+            <option value="quy-dinh">quy-dinh</option>
+            <option value="bieu-mau">bieu-mau</option>
+            <option value="khac">khac</option>
+          </select>
+        </div>
+        <div>
+          <label>Tên PDF/Slides (để trống = auto)</label>
+          <input id="pdfNameAdv" placeholder="PublicPack_Filter_{yyyyMMdd}"/>
+          <div class="inline" style="margin-top:10px">
+            <button class="btn" id="btnDryRunAdv">Xem trước</button>
+            <button class="btn ok" id="btnPdfAdv">Xuất 1 PDF</button>
+            <button class="btn primary" id="btnSlidesAdv">Xuất Google Slides</button>
+          </div>
+        </div>
+      </div>
+      <details style="margin-top:10px">
+        <summary>Tùy chọn bìa PDF/Slides</summary>
+        <div class="row" style="margin-top:10px">
+          <div><label>Tiêu đề</label><input id="coverTitleAdv" placeholder="Bộ hồ sơ gửi khách (lọc nâng cao)"/></div>
+          <div><label>Phụ đề</label><input id="coverSubtitleAdv" placeholder="CPHACO · Public Pack"/></div>
+        </div>
+        <label>Giới thiệu</label>
+        <textarea id="coverNoteAdv" placeholder="Tổng hợp theo bộ lọc: loại/khuContains/từ khoá."></textarea>
+      </details>
+    </div>
+
+    <div class="card col-12" id="resultCard" style="display:none">
+      <h2>Kết quả</h2>
+      <div class="small" id="summary"></div>
+      <div class="hint">Preview (tối đa 200 mục đầu tiên)</div>
+      <div style="overflow:auto; max-height:460px; border:1px solid var(--border); border-radius:12px; margin-top:8px">
+        <table id="tbl"><thead>
+          <tr>
+            <th>Preview</th><th>#</th><th>Loại</th><th>Khu</th><th>Tên hiển thị / File</th><th>QĐ</th><th>Ngày</th><th>Link</th>
+          </tr>
+        </thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Google APIs & GIS -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js"></script>
+<!-- jsPDF for client PDF -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<script>
+/** ====== CONFIG (thay lại của bạn) ====== */
+const CLIENT_ID  = '1046417477832-k0rghjg5em7in4qcbgun1o64d7poafof.apps.googleusercontent.com';
+const API_KEY    = 'AIzaSyDdZru1Bxdon9r1stBoPhymr0Y5BtgbFvE';
+const SHEET_ID   = '1ca0pvT16RdNvuuInprbOZ06MyOUDosLFYlMykW1IyNU';
+const SHEET_NAME = 'MASTER_v2_for_GSheet';
+const PUBLIC_PACK_ROOT_ID = '1CQ5w6HIVHZ3aKfyo62LGIZm5QmuAKWEw'; // Folder lưu Slides
+const SCOPES = [
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/drive',
+  'https://www.googleapis.com/auth/presentations'
+].join(' ');
+
+/** ====== STATE ====== */
+let tokenClient, accessToken = null;
+let masterRows = [];
+const ALLOWED_TYPES = new Set(['bang-gia','ban-do','hinh-anh','quy-dinh','bieu-mau','khac']);
+const MAX_PREVIEW = 200;
+
+// Cache token (giảm phải consent lại sau refresh)
+const TOKEN_STORAGE_KEY = 'CP_PUBLICPACK_TOKEN';
+const TOKEN_EXP_KEY     = 'CP_PUBLICPACK_TOKEN_EXP'; // epoch ms
+
+/** ====== AUTH ====== */
+function initAuth() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp && resp.access_token) {
+        accessToken = resp.access_token;
+        // Nếu có expires_in -> cache
+        try {
+          const now = Date.now();
+          const expMs = now + (Number(resp.expires_in || 3600) - 60) * 1000; // trừ 60s
+          sessionStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+          sessionStorage.setItem(TOKEN_EXP_KEY, String(expMs));
+        } catch(e){}
+        document.getElementById('signoutBtn').style.display='inline-flex';
+        document.getElementById('signinBtn').style.display='none';
+        showStatus('Đăng nhập thành công.');
+        loadMaster();
+      } else if (resp && resp.error) {
+        showStatus('Lỗi đăng nhập: ' + resp.error);
+      }
+    }
+  });
+
+  // Render nút GIS
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: ()=>{} });
+  google.accounts.id.renderButton(
+    document.getElementById('signinBtn'),
+    { theme: 'outline', size: 'large', text: 'continue_with' }
+  );
+  document.getElementById('signinBtn').onclick = ()=> tokenClient.requestAccessToken({ prompt: 'consent' });
+  document.getElementById('signoutBtn').onclick = signOut;
+
+  // Auto try silent token nếu còn hạn
+  trySilentToken();
+}
+
+function trySilentToken(){
+  const cached = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+  const expStr = sessionStorage.getItem(TOKEN_EXP_KEY);
+  const now = Date.now();
+  if (cached && expStr && Number(expStr) > now + 5000) {
+    accessToken = cached;
+    document.getElementById('signoutBtn').style.display='inline-flex';
+    document.getElementById('signinBtn').style.display='none';
+    showStatus('Đã khôi phục phiên đăng nhập.');
+    loadMaster();
+  } else {
+    // nếu user đã cấp quyền trước đó, gọi silent
+    tokenClient.requestAccessToken({ prompt: '' });
+  }
+}
+
+function signOut(){
+  if (!accessToken) return;
+  const t = accessToken;
+  // revoke token hiện tại
+  google.accounts.oauth2.revoke(t, ()=>{});
+  accessToken = null;
+  // clear cache
+  sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+  sessionStorage.removeItem(TOKEN_EXP_KEY);
+
+  showStatus('Đã đăng xuất.');
+  masterRows = [];
+  document.getElementById('resultCard').style.display='none';
+  document.querySelector('#tbl tbody').innerHTML='';
+  document.getElementById('summary').textContent='';
+  document.getElementById('signinBtn').style.display='inline-block';
+  document.getElementById('signoutBtn').style.display='none';
+}
+
+/** ====== GOOGLE API LOADER ====== */
+function gapiLoad() {
+  gapi.load('client', async () => {
+    await gapi.client.init({
+      apiKey: API_KEY,
+      discoveryDocs: [
+        'https://sheets.googleapis.com/$discovery/rest?version=v4',
+        'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
+        'https://slides.googleapis.com/$discovery/rest?version=v1'
+      ]
+    });
+    initAuth();
+  });
+}
+window.onload = gapiLoad;
+
+/** ====== HELPERS ====== */
+function showStatus(t){ document.getElementById('statusBox').innerHTML = t; }
+function val(id){ return (document.getElementById(id).value||'').trim(); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+function isAllowed(row){
+  const loai = String(row.loai||'').toLowerCase();
+  if (String(row.hien_thi||'').toUpperCase()==='N') return false;
+  return ALLOWED_TYPES.has(loai);
+}
+function matchKhuExact(row, q){
+  q = String(q||'').toUpperCase();
+  const blob = (String(row.khu||'') + ' ' + String(row.vi_tri||'')).toUpperCase();
+  return q && (blob.includes(q));
+}
+function matchAdv(row, khuContains, textContains, loaiIn){
+  if (khuContains){
+    const b = (String(row.khu||'') + ' ' + String(row.vi_tri||'') + ' ' + String(row.group_key||'')).toUpperCase();
+    if (!b.includes(String(khuContains).toUpperCase())) return false;
+  }
+  if (textContains){
+    const all = Object.values(row).map(v=>String(v||'').toUpperCase()).join(' ');
+    if (!all.includes(String(textContains).toUpperCase())) return false;
+  }
+  if (loaiIn && loaiIn.length){
+    const l = String(row.loai||'').toLowerCase();
+    if (!loaiIn.map(x=>String(x).toLowerCase()).includes(l)) return false;
+  }
+  return true;
+}
+function mapRows(values){
+  if (!values || !values.length) return [];
+  const header = values[0].map(x=>String(x||'').trim().toLowerCase());
+  const idx = Object.fromEntries(header.map((h,i)=>[h,i]));
+  const get = (r, k)=> r[idx[k]] ?? '';
+  const rows = [];
+  for (let i=1;i<values.length;i++){
+    const r = values[i];
+    if (String(r.join('')).trim()==='') continue;
+    rows.push({
+      aud: get(r,'aud'), loai: get(r,'loai'), scope_type:get(r,'scope_type'),
+      khu: get(r,'khu'), vi_tri:get(r,'vi_tri'), group_key:get(r,'group_key'),
+      applies_to:get(r,'applies_to'), hien_thi:get(r,'hien_thi'), fileId:get(r,'fileid')||get(r,'fileId'),
+      ten_hien_thi:get(r,'ten_hien_thi'), thu_tu:get(r,'thu_tu'), qd:get(r,'qd'), ngay:get(r,'ngay'),
+      tags:get(r,'tags'), ghi_chu:get(r,'ghi_chu'), filename:get(r,'filename'), ext:get(r,'ext'),
+      drive_url:get(r,'drive_url'), mimeType:get(r,'mimetype'), sizeBytes:get(r,'sizebytes'), drive_error:get(r,'drive_error')
+    });
+  }
+  return rows;
+}
+function extractId(u){
+  const s = String(u||'');
+  let m = s.match(/\/d\/([-\w]{25,})/); if (m) return m[1];
+  m = s.match(/[?&]id=([-\w]{25,})/);    if (m) return m[1];
+  m = s.match(/[-\w]{25,}/);             return m ? m[0] : '';
+}
+async function ensureSlidesLoaded() {
+  if (!gapi.client.slides || !gapi.client.slides.presentations) {
+    await gapi.client.load('slides', 'v1');
+  }
+}
+
+// LẤY ẢNH PREVIEW AN TOÀN (tránh lh3 CORS): export PNG cho Apps file, alt=media cho file binary
+async function drivePreviewDataUrl(fileId){
+  if(!fileId || !accessToken) return null;
+
+  const meta = await gapi.client.drive.files.get({
+    fileId,
+    fields: 'id,mimeType,name',
+    supportsAllDrives: true
+  });
+  const mime = meta.result.mimeType || '';
+
+  let resp;
+  if (mime.startsWith('application/vnd.google-apps.document') ||
+      mime.startsWith('application/vnd.google-apps.presentation') ||
+      mime.startsWith('application/vnd.google-apps.drawing')) {
+    const exportMime = 'image/png';
+    const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}/export?mimeType=${encodeURIComponent(exportMime)}&supportsAllDrives=true`;
+    resp = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
+  } else {
+    const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`;
+    resp = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
+  }
+
+  if(!resp.ok) return null;
+  const blob = await resp.blob();
+  return await blobToDataURL(blob);
+}
+function blobToDataURL(blob){
+  return new Promise(res => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.readAsDataURL(blob);
+  });
+}
+
+/** ====== LOAD MASTER ====== */
+async function loadMaster(){
+  if (!accessToken){ showStatus('Chưa đăng nhập.'); return; }
+  showStatus('Đang đọc MASTER…');
+  const resp = await gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: SHEET_NAME
+  });
+  masterRows = mapRows(resp.result.values);
+  showStatus('MASTER đã nạp: ' + masterRows.length + ' dòng.');
+  // Quick links
+  const q = document.getElementById('quickLinks'); q.innerHTML='';
+  const a1 = document.createElement('a'); a1.className='btn'; a1.target='_blank';
+  a1.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`; a1.textContent='Mở MASTER';
+  q.appendChild(a1);
+}
+
+/** ====== RENDER TABLE ====== */
+async function renderItems(items){
+  document.getElementById('resultCard').style.display='block';
+  const tbody = document.querySelector('#tbl tbody'); tbody.innerHTML='';
+  const list = items.slice(0, MAX_PREVIEW);
+  let i = 0;
+  for (const it of list){
+    const tr = document.createElement('tr');
+    const title = it.ten_hien_thi || it.filename || '(no title)';
+    const link = it.drive_url || (it.fileId ? `https://drive.google.com/file/d/${it.fileId}/view` : '');
+    const fid = it.fileId || extractId(it.drive_url);
+    let dataUrl = '';
+    if (fid) dataUrl = await drivePreviewDataUrl(fid) || '';
+    tr.innerHTML = `
+      <td>${dataUrl ? `<img class="thumb" src="${dataUrl}">` : ''}</td>
+      <td class="mono">${(++i)}</td>
+      <td>${escapeHtml(it.loai||'')}</td>
+      <td class="mono">${escapeHtml(it.khu||'')}</td>
+      <td>${escapeHtml(title)}</td>
+      <td class="mono">${escapeHtml(it.qd||'')}</td>
+      <td class="mono">${escapeHtml(it.ngay||'')}</td>
+      <td>${link?`<a target="_blank" rel="noopener" href="${link}">mở</a>`:''}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+/** ====== FILTER FLOWS ====== */
+function dryRunKhu(){
+  const khu = val('khuExact');
+  if (!khu) return alert('Nhập KHU.');
+  const items = masterRows.filter(r=> isAllowed(r) && matchKhuExact(r, khu));
+  document.getElementById('summary').innerHTML =
+    `<b>DRY-RUN</b> • KHU <b>${escapeHtml(khu)}</b> • Tổng: <b>${items.length}</b>`;
+  renderItems(items);
+  return items;
+}
+function dryRunAdv(){
+  const kc = val('khuContains'), tc = val('textContains');
+  const loai = Array.from(document.getElementById('loaiIn').selectedOptions).map(o=>o.value);
+  const items = masterRows.filter(r=> isAllowed(r) && matchAdv(r, kc, tc, loai));
+  document.getElementById('summary').innerHTML =
+    `<b>DRY-RUN</b> • Lọc nâng cao • Tổng: <b>${items.length}</b>`;
+  renderItems(items);
+  return items;
+}
+
+/** ====== PDF (client) ====== */
+async function buildPdf(items, cover){
+  if (!items.length) throw new Error('Không có dữ liệu để xuất PDF.');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const W = 595.28, H = 841.89, M = 42;
+
+  const title = cover.title || 'Bộ hồ sơ gửi khách';
+  const subtitle = cover.subtitle || '';
+  const note = cover.note || '';
+
+  doc.setFillColor(30,41,59); doc.rect(0,0,18,H,'F');
+  doc.setTextColor(15,23,42); doc.setFont('helvetica','bold'); doc.setFontSize(26);
+  doc.text(title, M+30, 180, { maxWidth: W - (M*2) });
+  if (subtitle){
+    doc.setFont('helvetica','normal'); doc.setFontSize(14); doc.setTextColor(100,116,139);
+    doc.text(subtitle, M+30, 210, { maxWidth: W - (M*2) });
+  }
+  if (note){
+    doc.setFontSize(11); doc.setTextColor(148,163,184);
+    doc.text(note, M+30, 250, { maxWidth: W - (M*2) });
+  }
+  doc.setFontSize(9); doc.setTextColor(148,163,184);
+  doc.text('© ' + (new Date()).getFullYear() + ' · CPHACO', M+30, H - 50);
+
+  // TOC
+  doc.addPage();
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(15,23,42);
+  doc.text('Mục lục', M, 80);
+  doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(51,65,85);
+  const limitToc = Math.min(items.length, 25);
+  let y = 110;
+  for (let i=0;i<limitToc;i++){
+    const nm = (items[i].ten_hien_thi || items[i].filename || '').toString();
+    doc.text(`${i+1}. ${nm}`, M, y, { maxWidth: W - M*2 }); y += 20;
+    if (y > H - 60) { doc.addPage(); y = 80; }
+  }
+
+  // Items
+  const limit = Math.min(items.length, 40);
+  for (let i=0;i<limit;i++){
+    const it = items[i];
+    doc.addPage();
+    doc.setFillColor(241,245,249); doc.rect(M, 60, W - M*2, 28, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(30,41,59);
+    doc.text(`#${i+1} ${it.ten_hien_thi || it.filename || '(no title)'}`, M+12, 78, { maxWidth: W - M*2 - 24 });
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(71,85,105);
+    const meta = [it.loai||'', it.khu||'', it.qd||'', it.ngay||''].filter(Boolean).join(' • ');
+    doc.text(meta, M+12, 98, { maxWidth: W - M*2 - 24 });
+
+    const fid = it.fileId || extractId(it.drive_url);
+    if (fid){
+      const dataUrl = await drivePreviewDataUrl(fid) || '';
+      if (dataUrl){
+        try{
+          const imgW = 360, x = M+6, yImg = 120;
+          doc.addImage(dataUrl, 'PNG', x, yImg, imgW, imgW*0.62, undefined, 'FAST');
+        }catch(e){}
+      }
+    }
+    doc.setFontSize(10); doc.setTextColor(71,85,105);
+    const desc = (it.ghi_chu || '').toString();
+    doc.text(desc, M+390, 140, { maxWidth: W - (M+390) - M, lineHeightFactor: 1.4 });
+
+    const link = it.drive_url || (fid ? `https://drive.google.com/file/d/${fid}/view` : '');
+    if (link){
+      doc.setTextColor(25, 103, 210);
+      doc.textWithLink('Mở tài liệu', M+390, 360, { url: link });
+    }
+  }
+
+  const base = (cover.fileBaseName || 'PublicPack') + '.pdf';
+  doc.save(base);
+}
+
+/** =========================
+ *  GOOGLE SLIDES (client)
+ *  ========================= */
+
+// Tạo file Slides rỗng trong thư mục PUBLIC_PACK_ROOT_ID
+async function createSlidesFile_(name){
+  const resp = await gapi.client.drive.files.create({
+    resource: {
+      name,
+      mimeType: 'application/vnd.google-apps.presentation',
+      parents: PUBLIC_PACK_ROOT_ID ? [PUBLIC_PACK_ROOT_ID] : []
+    },
+    fields: 'id, webViewLink',
+    supportsAllDrives: true
+  });
+  return resp.result; // {id, webViewLink}
+}
+
+// Thêm 1 trang BLANK
+function reqAppendBlank_(pageObjectId){
+  return {
+    createSlide: {
+      objectId: pageObjectId,
+      slideLayoutReference: { predefinedLayout: 'BLANK' }
+    }
+  };
+}
+
+// Tạo text box
+function reqText_(pageId, text, x, y, w, h, opts={}){
+  const objectId = 'TB_' + Math.random().toString(36).slice(2,9);
+  const reqs = [
+    {
+      createShape: {
+        objectId,
+        shapeType: 'TEXT_BOX',
+        elementProperties: {
+          pageObjectId: pageId,
+          size: { width: { magnitude: w, unit: 'PT' }, height: { magnitude: h, unit: 'PT' } },
+          transform: { scaleX: 1, scaleY: 1, shearX: 0, shearY: 0, translateX: x, translateY: y, unit: 'PT' }
+        }
+      }
+    },
+    { insertText: { objectId, text: text || '' } }
+  ];
+  const style = {};
+  if (opts.bold !== undefined) style.bold = !!opts.bold;
+  if (opts.font) style.fontFamily = opts.font;
+  if (opts.size) style.fontSize = { magnitude: opts.size, unit: 'PT' };
+  if (opts.color) style.color = { opaqueColor: { rgbColor: hexToRgb_(opts.color) } };
+  if (Object.keys(style).length) {
+    reqs.push({ updateTextStyle: { objectId, fields: Object.keys(style).join(','), style } });
+  }
+  return reqs;
+}
+
+// Tạo ảnh từ URL (QR – URL public)
+function reqImage_(pageId, url, x, y, w, h){
+  const objectId = 'IMG_' + Math.random().toString(36).slice(2,9);
+  return {
+    createImage: {
+      objectId,
+      url,
+      elementProperties: {
+        pageObjectId: pageId,
+        size: { width: { magnitude: w, unit: 'PT' }, height: { magnitude: h, unit: 'PT' } },
+        transform: { scaleX: 1, scaleY: 1, shearX: 0, shearY: 0, translateX: x, translateY: y, unit: 'PT' }
+      }
+    }
+  };
+}
+function hexToRgb_(hex){
+  const h = hex.replace('#','');
+  const n = parseInt(h.length===3 ? h.split('').map(c=>c+c).join('') : h, 16);
+  return { red: ((n>>16)&255)/255, green: ((n>>8)&255)/255, blue: (n&255)/255 };
+}
+
+// Build Slides từ danh sách items (không chèn thumbnail bị CORS; dùng QR link mở tài liệu)
+async function buildSlides_(items, cover){
+  if (!items?.length) throw new Error('Không có dữ liệu.');
+  const name = (cover.fileBaseName || 'PublicPack') + ' (Slides)';
+
+  const file = await createSlidesFile_(name);
+  const presId = file.id;
+
+  // Lấy trang đầu (Slides tự sinh) để dùng làm bìa
+  const pres = await gapi.client.slides.presentations.get({ presentationId: presId });
+  const firstPageId = pres.result.slides[0].objectId;
+
+  const reqs = [];
+
+  // Xóa phần tử mặc định trên bìa
+  const firstElems = pres.result.slides[0].pageElements || [];
+  for (const el of firstElems){ reqs.push({ deleteObject: { objectId: el.objectId } }); }
+
+  // Bìa
+  reqs.push(...reqText_(firstPageId, cover.title || 'Bộ hồ sơ gửi khách', 60, 160, 600, 60, { size: 32, bold: true, color: '#0F172A' }));
+  if (cover.subtitle){
+    reqs.push(...reqText_(firstPageId, cover.subtitle, 60, 230, 600, 30, { size: 18, color: '#334155' }));
+  }
+  if (cover.note){
+    reqs.push(...reqText_(firstPageId, cover.note, 60, 270, 520, 60, { size: 12, color: '#475569' }));
+  }
+  reqs.push(...reqText_(firstPageId, `© ${new Date().getFullYear()} · CPHACO`, 60, 480, 400, 20, { size: 10, color:'#64748B' }));
+
+  // TOC
+  const tocId = 'PAGE_TOC';
+  reqs.push(reqAppendBlank_(tocId));
+  reqs.push(...reqText_(tocId, 'Danh mục nội dung', 60, 40, 600, 40, { size: 20, bold: true, color:'#0F172A' }));
+  const limitTOC = Math.min(items.length, 28);
+  let ty = 90;
+  for (let i=0;i<limitTOC;i++){
+    const line = `${i+1}. ${(items[i].ten_hien_thi || items[i].filename || '(no title)')}`;
+    reqs.push(...reqText_(tocId, line, 60, ty, 600, 20, { size: 12, color:'#334155' }));
+    ty += 18;
+  }
+
+  // Trang từng mục + QR
+  const LIMIT = Math.min(items.length, 120);
+  for (let i=0;i<LIMIT;i++){
+    const pageId = 'PAGE_' + (i+1);
+    const it = items[i];
+    const meta = [it.loai||'', it.khu||'', it.qd||'', it.ngay||''].filter(Boolean).join(' • ');
+    const link = it.drive_url || (it.fileId ? `https://drive.google.com/file/d/${it.fileId}/view` : '');
+    const qr = link ? `https://chart.googleapis.com/chart?cht=qr&chs=280x280&chl=${encodeURIComponent(link)}` : '';
+
+    reqs.push(reqAppendBlank_(pageId));
+    reqs.push(...reqText_(pageId, `#${i+1} ${it.ten_hien_thi || it.filename || '(no title)'}`, 60, 60, 640, 30, { size: 16, bold: true, color:'#0F172A' }));
+    reqs.push(...reqText_(pageId, meta, 60, 92, 640, 18, { size: 12, color:'#334155' }));
+    if (qr){
+      reqs.push(reqImage_(pageId, qr, 620, 160, 160, 160));
+      reqs.push(...reqText_(pageId, 'Mở tài liệu:\n' + link, 600, 340, 200, 70, { size: 10, color:'#475569' }));
+    }
+  }
+
+  await gapi.client.slides.presentations.batchUpdate({ presentationId: presId, resource: { requests: reqs } });
+
+  return { id: presId, url: file.webViewLink };
+}
+
+/** ====== UI BIND ====== */
+document.getElementById('btnDryRunKhu').onclick = ()=> {
+  if (!masterRows.length) return alert('Hãy đăng nhập trước.');
+  dryRunKhu();
+};
+document.getElementById('btnPdfKhu').onclick = async ()=>{
+  if (!masterRows.length) return alert('Hãy đăng nhập trước.');
+  const khu = val('khuExact'); if (!khu) return alert('Nhập KHU.');
+  const items = masterRows.filter(r=> isAllowed(r) && matchKhuExact(r, khu));
+  const cover = {
+    title: val('coverTitleKhu') || `Bộ hồ sơ gửi khách – ${khu}`,
+    subtitle: val('coverSubtitleKhu') || 'CPHACO · Public Pack',
+    note: val('coverNoteKhu') || 'Tổng hợp: bảng giá, bản đồ/quy hoạch, hình ảnh & tài liệu liên quan.',
+    fileBaseName: (val('pdfNameKhu') || `PublicPack_${khu}`)
+  };
+  await buildPdf(items, cover);
+};
+document.getElementById('btnDryRunAdv').onclick = ()=>{
+  if (!masterRows.length) return alert('Hãy đăng nhập trước.');
+  dryRunAdv();
+};
+document.getElementById('btnPdfAdv').onclick = async ()=>{
+  if (!masterRows.length) return alert('Hãy đăng nhập trước.');
+  const kc = val('khuContains'), tc = val('textContains');
+  const loai = Array.from(document.getElementById('loaiIn').selectedOptions).map(o=>o.value);
+  const items = masterRows.filter(r=> isAllowed(r) && matchAdv(r, kc, tc, loai));
+  const cover = {
+    title: val('coverTitleAdv') || 'Bộ hồ sơ gửi khách (lọc nâng cao)',
+    subtitle: val('coverSubtitleAdv') || 'CPHACO · Public Pack',
+    note: val('coverNoteAdv') || 'Tổng hợp theo bộ lọc: loại/khuContains/từ khoá.',
+    fileBaseName: (val('pdfNameAdv') || `PublicPack_Filter_${new Date().toISOString().slice(0,10)}`)
+  };
+  await buildPdf(items, cover);
+};
+
+// SLIDES — THEO KHU
+document.getElementById('btnSlidesKhu').onclick = async ()=>{
+  if (!masterRows.length) return alert('Hãy đăng nhập trước.');
+  await ensureSlidesLoaded();
+  const khu = val('khuExact'); if (!khu) return alert('Nhập KHU.');
+  const items = masterRows.filter(r=> isAllowed(r) && matchKhuExact(r, khu));
+  const cover = {
+    title: val('coverTitleKhu') || `Bộ hồ sơ gửi khách – ${khu}`,
+    subtitle: val('coverSubtitleKhu') || 'CPHACO · Public Pack',
+    note: val('coverNoteKhu') || 'Tổng hợp: bảng giá, bản đồ/quy hoạch, hình ảnh & tài liệu liên quan.',
+    fileBaseName: (val('pdfNameKhu') || `PublicPack_${khu}`)
+  };
+  try{
+    showStatus('Đang tạo Google Slides…');
+    const out = await buildSlides_(items, cover);
+    showStatus('Đã tạo Slides.');
+    alert('Slides đã tạo: ' + out.url);
+    window.open(out.url, '_blank');
+  }catch(e){ console.error(e); alert('Lỗi Slides: ' + (e.message || e)); }
+};
+
+// SLIDES — LỌC NÂNG CAO
+document.getElementById('btnSlidesAdv').onclick = async ()=>{
+  if (!masterRows.length) return alert('Hãy đăng nhập trước.');
+  await ensureSlidesLoaded();
+  const kc = val('khuContains'), tc = val('textContains');
+  const loai = Array.from(document.getElementById('loaiIn').selectedOptions).map(o=>o.value);
+  const items = masterRows.filter(r=> isAllowed(r) && matchAdv(r, kc, tc, loai));
+  const cover = {
+    title: val('coverTitleAdv') || 'Bộ hồ sơ gửi khách (lọc nâng cao)',
+    subtitle: val('coverSubtitleAdv') || 'CPHACO · Public Pack',
+    note: val('coverNoteAdv') || 'Tổng hợp theo bộ lọc: loại/khuContains/từ khoá.',
+    fileBaseName: (val('pdfNameAdv') || `PublicPack_Filter_${new Date().toISOString().slice(0,10)}`)
+  };
+  try{
+    showStatus('Đang tạo Google Slides…');
+    const out = await buildSlides_(items, cover);
+    showStatus('Đã tạo Slides.');
+    alert('Slides đã tạo: ' + out.url);
+    window.open(out.url, '_blank');
+  }catch(e){ console.error(e); alert('Lỗi Slides: ' + (e.message || e)); }
+};
+
+/** ====== INIT ====== */
+document.addEventListener('DOMContentLoaded', ()=>{
+  const q = document.getElementById('quickLinks');
+  q.innerHTML = '<span class="small">Đăng nhập để hiển thị liên kết MASTER…</span>';
+});
+</script>
+</body>
+</html>

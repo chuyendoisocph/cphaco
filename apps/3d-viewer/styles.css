@@ -1,0 +1,375 @@
+/* ---------- Layout riêng cho hero của trang 3D ---------- */
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+/* Chữ giới thiệu dùng style hero-content gốc, chỉ căn giữa & giới hạn rộng */
+.hero-content {
+  max-width: 780px;
+  text-align: center;
+}
+
+/* Khối viewer 3D bên dưới intro */
+.viewer-wrapper {
+  width: 100%;
+}
+
+/* ---------- Card viewer 3D ---------- */
+
+.viewer-card-3d {
+  background: var(--bg-card, #ffffff);
+  border-radius: 1.25rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+  padding: 1.4rem 1.5rem 1rem;
+}
+
+/* Header card */
+
+.viewer-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.9rem;
+}
+
+.viewer-card-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.viewer-card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666666);
+}
+
+.viewer-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip-small {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: #f3f4ff;
+  color: var(--primary-blue, #0066ff);
+}
+
+/* ---------- Canvas 3D ---------- */
+
+.viewer-canvas-shell {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: radial-gradient(circle at 50% 0%, #111827 0%, #020617 55%, #000 100%);
+  margin-bottom: 1rem;
+}
+
+#viewer {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Overlay loading */
+
+.viewer-loading {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.99));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.viewer-spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 3px solid rgba(148, 163, 184, 0.3);
+  border-top-color: var(--primary-blue, #0066ff);
+  animation: spin 0.9s linear infinite;
+}
+
+.viewer-loading-text {
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Controls: chọn sản phẩm / góc nhìn / bộ phận ---------- */
+
+.viewer-controls-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.viewer-block {
+  background: var(--bg-light, #f9fafb);
+  border-radius: 1rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+/* Labels nhỏ trên block */
+
+.viewer-block-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #666666);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.viewer-block-label-inline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 0.55rem;
+}
+
+.viewer-block-hint {
+  font-size: 0.7rem;
+  color: var(--text-light, #999999);
+}
+
+/* Select sản phẩm */
+
+.viewer-select-shell {
+  margin-top: 0.35rem;
+}
+
+.viewer-select-shell select {
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  color: var(--text-primary, #1a1a1a);
+  background: #ffffff;
+}
+
+/* Buttons preset camera */
+
+.viewer-view-buttons {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.btn-view {
+  flex: 1;
+  min-width: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: #ffffff;
+  color: var(--text-secondary, #666666);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.2rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-view:hover {
+  border-color: var(--primary-blue, #0066ff);
+  color: var(--primary-blue-dark, #0052cc);
+}
+
+.btn-view.is-active {
+  background: linear-gradient(135deg, var(--gradient-start, #0066ff), var(--gradient-end, #00c9ff));
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* Block BỘ PHẬN */
+
+.viewer-block-parts {
+  padding-bottom: 0.5rem;
+}
+
+.viewer-parts-toolbar {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.btn-chip {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: #ffffff;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.4rem;
+  cursor: pointer;
+  color: var(--text-secondary, #666666);
+}
+
+.btn-chip:hover {
+  border-color: var(--primary-blue, #0066ff);
+  color: var(--primary-blue-dark, #0052cc);
+}
+
+.viewer-parts-list {
+  margin-top: 0.45rem;
+  max-height: 140px;
+  overflow: auto;
+  padding-right: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.part-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666666);
+}
+
+.part-item input[type="checkbox"] {
+  accent-color: var(--primary-blue, #0066ff);
+}
+
+/* ---------- Meta: FPS / Polygon / Center ---------- */
+
+.viewer-meta-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.viewer-meta-item {
+  flex: 0 0 auto;
+  min-width: 90px;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: var(--bg-light, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.viewer-meta-label {
+  font-size: 0.7rem;
+  color: var(--text-light, #999999);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.viewer-meta-value {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+}
+
+/* ---------- Features section bên dưới viewer ---------- */
+
+.features-section {
+  padding: 4rem 0 5rem;
+  background: #ffffff;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+  margin-bottom: 0.5rem;
+}
+
+.section-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary, #666666);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature-card {
+  background: #f9fafb;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+}
+
+.feature-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.feature-card h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.feature-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666666);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1024px) {
+  .hero {
+    padding: 6rem 2rem 3rem;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+  }
+
+  .viewer-canvas-shell {
+    height: 360px;
+  }
+
+  .viewer-controls-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 5rem 1.5rem 2.5rem;
+  }
+
+  .hero-title {
+    font-size: 2.4rem;
+  }
+
+  .viewer-card-3d {
+    padding: 1.1rem 1.1rem 0.9rem;
+  }
+
+  .viewer-canvas-shell {
+    height: 260px;
+  }
+}
