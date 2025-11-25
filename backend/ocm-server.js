@@ -20,19 +20,28 @@ let sheetsClientPromise = null;
 async function getSheetsClient() {
   if (sheetsClientPromise) return sheetsClientPromise;
 
-  const keyFile = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  if (!keyFile) {
-    throw new Error('GOOGLE_APPLICATION_CREDENTIALS is not set. Check your .env file.');
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) {
+    console.error('[OCM] Missing env GOOGLE_SERVICE_ACCOUNT_JSON');
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not set. Check your Render env vars.');
   }
 
-  console.log('[OCM] Using keyFile:', keyFile);
+  let credentials;
+  try {
+    credentials = JSON.parse(raw);
+  } catch (e) {
+    console.error('[OCM] Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON:', e.message);
+    throw e;
+  }
+
+  // Đừng log full private_key ra log
+  console.log('[OCM] Using service account:', credentials.client_email);
 
   const auth = new google.auth.GoogleAuth({
-    keyFile,
+    credentials, // ✅ Truyền object JSON vào đây, KHÔNG phải keyFile
     scopes: ['https://www.googleapis.com/auth/spreadsheets']
   });
 
-  // Dùng GoogleAuth làm auth cho google.sheets
   const sheets = google.sheets({ version: 'v4', auth });
   sheetsClientPromise = sheets;
   return sheets;

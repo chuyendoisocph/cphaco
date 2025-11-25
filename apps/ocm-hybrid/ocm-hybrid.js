@@ -2,7 +2,7 @@
    CONFIG – gắn với cphaco.app + backend OCM
    ========================================================= */
 const TOKEN_KEY     = 'CP_AUTH_TOKEN';                // SSO cphaco.app
-const OCM_API_BASE  = 'https://cphaco.app'; // TODO: sửa
+const OCM_API_BASE  = 'https://cphaco.onrender.com'; // TODO: sửa
 const MAPTILER_KEY  = '8pEn3Eq4R9zBXqJNIOXF';       // TODO: sửa
 const DEFAULT_CENTER= [106.6521,11.1836];
 const DEFAULT_ZOOM  = 18;
