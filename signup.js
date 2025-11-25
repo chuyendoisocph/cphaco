@@ -145,68 +145,55 @@ emailInput.addEventListener('input', function() {
  * Send OTP to email
  */
 async function sendOTP(email) {
-    try {
-        console.log('Sending OTP to:', email);
-        
-        const response = await fetch(AUTH_BASE, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify({
-                action: 'send-otp',
-                email: email
-            })
-        });
-        
-        const data = await response.json();
-        console.log('Send OTP response:', data);
-        
-        if (!data.ok) {
-            throw new Error(data.error || 'Không thể gửi OTP');
-        }
-        
-        return true;
-    } catch (error) {
-        console.error('Send OTP error:', error);
-        throw error;
-    }
+  try {
+    console.log('Sending OTP to:', email);
+
+    const response = await fetch(AUTH_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams({ action: 'send-otp', email }).toString()
+    });
+
+    const data = await response.json();
+    console.log('Send OTP response:', data);
+    if (!data.ok) throw new Error(data.error || 'Không thể gửi OTP');
+    return true;
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    throw error;
+  }
 }
+
 
 /**
  * Register user with OTP verification
  */
 async function registerUser(fullname, email, password, otpCode) {
-    try {
-        console.log('Registering user:', email);
-        
-        const response = await fetch(AUTH_BASE, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify({
-                action: 'signup',
-                fullname: fullname,
-                email: email,
-                password: password,
-                otpCode: otpCode
-            })
-        });
-        
-        const data = await response.json();
-        console.log('Signup response:', data);
-        
-        if (!data.ok) {
-            throw new Error(data.error || 'Đăng ký thất bại');
-        }
-        
-        return data;
-    } catch (error) {
-        console.error('Signup error:', error);
-        throw error;
-    }
+  try {
+    console.log('Registering user:', email);
+
+    const response = await fetch(AUTH_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams({
+        action: 'signup',
+        fullname,
+        email,
+        password,
+        otpCode
+      }).toString()
+    });
+
+    const data = await response.json();
+    console.log('Signup response:', data);
+    if (!data.ok) throw new Error(data.error || 'Đăng ký thất bại');
+    return data;
+  } catch (error) {
+    console.error('Signup error:', error);
+    throw error;
+  }
 }
+
 
 // ===== FORM SUBMISSION =====
 
