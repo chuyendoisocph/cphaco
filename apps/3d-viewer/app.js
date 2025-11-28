@@ -4,7 +4,6 @@ import { OrbitControls } from './libs/OrbitControls.js';
 import { RGBELoader } from './libs/RGBELoader.js';
 import { HDRLoader } from './libs/HDRLoader.js';
 
-
 let scene, camera, renderer, controls;
 let currentModel = null;
 let mixers = [];
@@ -15,6 +14,10 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 const fpsLabel = document.getElementById('fpsLabel');
 const polyLabel = document.getElementById('polyLabel');
 const centerLabel = document.getElementById('centerLabel');
+
+// 🔥 NEW: phần tử fullscreen
+const viewerShell = document.getElementById('viewerCanvasShell');
+const btnFullscreen = document.getElementById('btnFullscreen');
 
 const btnViewEls = Array.from(document.querySelectorAll('.btn-view'));
 const btnPartsAll = document.getElementById('btnPartsAll');
@@ -49,10 +52,10 @@ function init() {
   resizeRendererToDisplaySize();
 
   // 🔥 Bật pipeline “đẹp hơn”
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
-renderer.physicallyCorrectLights = true;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.physicallyCorrectLights = true;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -74,7 +77,7 @@ renderer.physicallyCorrectLights = true;
   dirLight.shadow.bias = -0.001;
   scene.add(dirLight);
 
-  // GROUND (nhận bóng) – giữ grid nếu bạn thích
+  // GROUND
   const groundGeo = new THREE.PlaneGeometry(30, 30);
   const groundMat = new THREE.MeshStandardMaterial({
     color: 0xd1d5db,
@@ -83,15 +86,10 @@ renderer.physicallyCorrectLights = true;
   });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
-  ground.position.y = 0; // model sau normalize sẽ nằm quanh 0
+  ground.position.y = 0;
   ground.receiveShadow = true;
   scene.add(ground);
   ground.visible = false;
-
-  // Nếu vẫn muốn grid phụ:
-  // const grid = new THREE.GridHelper(12, 24, 0x9ca3af, 0xd1d5db);
-  // grid.position.y = 0.001;
-  // scene.add(grid);
 
   // CONTROLS
   controls = new OrbitControls(camera, canvas);
@@ -118,82 +116,140 @@ renderer.physicallyCorrectLights = true;
     btnPartsAll.addEventListener('click', () => toggleAllParts(true));
     btnPartsNone.addEventListener('click', () => toggleAllParts(false));
   }
+
+  // 🔥 NEW: gắn sự kiện fullscreen
+  if (viewerShell && btnFullscreen) {
+    btnFullscreen.addEventListener('click', handleFullscreenToggle);
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+  }
 }
 
 function setupHDRI() {
   const loader = new HDRLoader();
 
   loader.load('assets/hdr/studio_small_08_1k.hdr', (hdr) => {
-    // hdr = { data: Float32Array, width, height }
     if (!hdr || !hdr.data || !hdr.width || !hdr.height) {
       console.error('[HDR] Dữ liệu HDR rỗng hoặc không hợp lệ:', hdr);
       return;
     }
 
-    // Tạo DataTexture từ buffer HDR
     const texture = new THREE.DataTexture(
       hdr.data,
       hdr.width,
       hdr.height,
-      THREE.RGBAFormat,      // HDRLoader trả RGBA float
+      THREE.RGBAFormat,
       THREE.FloatType
     );
     texture.needsUpdate = true;
 
-    // Tạo envMap từ equirect
     const pmrem = new THREE.PMREMGenerator(renderer);
     pmrem.compileEquirectangularShader();
 
-    // LƯU Ý: dùng fromEquirectangular thay vì fromEquirectangularTexture
     const envMap = pmrem.fromEquirectangular(texture).texture;
 
-    scene.environment = envMap;                 // cho PBR phản xạ
-    scene.background  = new THREE.Color(0xf5f7fb); // nền UI phẳng sáng
+    scene.environment = envMap;
+    scene.background = new THREE.Color(0xf5f7fb);
 
-    // dọn tài nguyên
     texture.dispose();
     pmrem.dispose();
   });
 }
 
 function resizeRendererToDisplaySize() {
+  if (!renderer || !camera) return;
+
   const canvas = renderer.domElement;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
 
   if (canvas.width !== width || canvas.height !== height) {
     renderer.setSize(width, height, false);
-    camera.aspect = width / height;
+    camera.aspect = width / height || 1;
     camera.updateProjectionMatrix();
   }
 }
 
+// EnvMap HDR
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 pmremGenerator.compileEquirectangularShader();
 
 const loader = new HDRLoader();
 
 loader.load('assets/hdr/lilienstein_4k.hdr', (hdrData) => {
-    const texture = new THREE.DataTexture(
-        hdrData.data,
-        hdrData.width,
-        hdrData.height,
-        THREE.RGBAFormat,
-        THREE.FloatType
-    );
-    texture.needsUpdate = true;
+  const texture = new THREE.DataTexture(
+    hdrData.data,
+    hdrData.width,
+    hdrData.height,
+    THREE.RGBAFormat,
+    THREE.FloatType
+  );
+  texture.needsUpdate = true;
 
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  const envMap = pmremGenerator.fromEquirectangular(texture).texture;
 
-    scene.environment = envMap;
-    scene.background = new THREE.Color(0xf5f7fb);
+  scene.environment = envMap;
+  scene.background = new THREE.Color(0xf5f7fb);
 
-    texture.dispose();
-    pmremGenerator.dispose();
+  texture.dispose();
+  pmremGenerator.dispose();
 });
 
+// 🔥 NEW: các hàm hỗ trợ fullscreen
 
+function isViewerFullscreen() {
+  return (
+    document.fullscreenElement === viewerShell ||
+    document.webkitFullscreenElement === viewerShell ||
+    document.mozFullScreenElement === viewerShell ||
+    document.msFullscreenElement === viewerShell
+  );
+}
+
+function handleFullscreenToggle() {
+  if (!viewerShell) return;
+
+  if (!isViewerFullscreen()) {
+    // Vào fullscreen
+    if (viewerShell.requestFullscreen) {
+      viewerShell.requestFullscreen();
+    } else if (viewerShell.webkitRequestFullscreen) {
+      viewerShell.webkitRequestFullscreen();
+    } else if (viewerShell.mozRequestFullScreen) {
+      viewerShell.mozRequestFullScreen();
+    } else if (viewerShell.msRequestFullscreen) {
+      viewerShell.msRequestFullscreen();
+    }
+  } else {
+    // Thoát fullscreen
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+}
+
+function handleFullscreenChange() {
+  if (!btnFullscreen) return;
+
+  if (isViewerFullscreen()) {
+    btnFullscreen.classList.add('is-fullscreen');
+  } else {
+    btnFullscreen.classList.remove('is-fullscreen');
+  }
+
+  // Cập nhật lại size/camera khi vào/thoát fullscreen
+  resizeRendererToDisplaySize();
+}
 
 function loadModel(url) {
   showLoading(true);
@@ -205,7 +261,6 @@ function loadModel(url) {
     (gltf) => {
       currentModel = gltf.scene;
 
-      // Cho toàn bộ mesh cast / receive shadow + double side
       currentModel.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
@@ -258,17 +313,14 @@ function normalizeAndFrameModel(model) {
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
 
-  // Đưa model về tâm
   model.position.x += -center.x;
   model.position.y += -center.y;
   model.position.z += -center.z;
 
-  // Scale vừa khung
   const maxDim = Math.max(size.x, size.y, size.z) || 1;
   const scale = 2.2 / maxDim;
   model.scale.setScalar(scale);
 
-  // Tính lại box sau khi dịch & scale
   const box2 = new THREE.Box3().setFromObject(model);
   const size2 = box2.getSize(new THREE.Vector3());
   const center2 = box2.getCenter(new THREE.Vector3());

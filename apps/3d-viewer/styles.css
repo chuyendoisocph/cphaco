@@ -373,3 +373,75 @@
     height: 260px;
   }
 }
+/* ---------- Canvas 3D ---------- */
+
+.viewer-canvas-shell {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: radial-gradient(circle at 50% 0%, #111827 0%, #020617 55%, #000 100%);
+  margin-bottom: 1rem;
+}
+
+/* Fullscreen mode adjustments */
+.viewer-canvas-shell:fullscreen {
+  border-radius: 0;
+  height: 100vh;
+}
+
+.viewer-canvas-shell:-webkit-full-screen {
+  border-radius: 0;
+  height: 100vh;
+}
+
+.viewer-canvas-shell:-moz-full-screen {
+  border-radius: 0;
+  height: 100vh;
+}
+
+#viewer {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Fullscreen button */
+.btn-fullscreen {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.btn-fullscreen:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.btn-fullscreen .icon-compress {
+  display: none;
+}
+
+.btn-fullscreen.is-fullscreen .icon-expand {
+  display: none;
+}
+
+.btn-fullscreen.is-fullscreen .icon-compress {
+  display: block;
+}
