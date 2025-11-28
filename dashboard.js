@@ -148,6 +148,16 @@ const APPS_DATABASE = {
         icon: '👥',
         color: 'linear-gradient(135deg, #fbc2eb, #a6c1ee)',
         status: 'active'
+    },
+    'FARM001': {
+        id: 'FARM001',
+        name: 'Cphaco Farm',
+        description: 'Quản lý Hoa màu',
+        url: 'https://cphaco-farm.vercel.app/',
+        icon: '🌾'
+        ,
+        color: 'linear-gradient(135deg, #a8edea, #fed6e3)',
+        status: 'active'
     }
 };
 
