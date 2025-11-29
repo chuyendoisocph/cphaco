@@ -15,7 +15,7 @@ const fpsLabel = document.getElementById('fpsLabel');
 const polyLabel = document.getElementById('polyLabel');
 const centerLabel = document.getElementById('centerLabel');
 
-// 🔥 NEW: phần tử fullscreen
+// Fullscreen elements
 const viewerShell = document.getElementById('viewerCanvasShell');
 const btnFullscreen = document.getElementById('btnFullscreen');
 
@@ -23,8 +23,18 @@ const btnViewEls = Array.from(document.querySelectorAll('.btn-view'));
 const btnPartsAll = document.getElementById('btnPartsAll');
 const btnPartsNone = document.getElementById('btnPartsNone');
 
+// New feature elements
+const environmentSelect = document.getElementById('environmentSelect');
+const btnScreenshot = document.getElementById('btnScreenshot');
+const btnModelInfo = document.getElementById('btnModelInfo');
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const modelInfoModal = document.getElementById('modelInfoModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+
 let lastFpsUpdate = 0;
 let frameCount = 0;
+let currentModelFileName = 'Unknown';
 
 init();
 animate();
@@ -51,7 +61,6 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   resizeRendererToDisplaySize();
 
-  // 🔥 Bật pipeline “đẹp hơn”
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -117,15 +126,90 @@ function init() {
     btnPartsNone.addEventListener('click', () => toggleAllParts(false));
   }
 
-  // 🔥 NEW: gắn sự kiện fullscreen
-  if (viewerShell && btnFullscreen) {
-    btnFullscreen.addEventListener('click', handleFullscreenToggle);
+  // Setup new feature listeners
+  if (environmentSelect) {
+    environmentSelect.addEventListener('change', (e) => switchEnvironment(e.target.value));
+  }
+  
+  if (btnScreenshot) {
+    btnScreenshot.addEventListener('click', captureScreenshot);
+  }
+  
+  if (btnModelInfo) {
+    btnModelInfo.addEventListener('click', showModelInfo);
+  }
+  
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      modelInfoModal.style.display = 'none';
+    });
+  }
+  
+  if (modelInfoModal) {
+    modelInfoModal.addEventListener('click', (e) => {
+      if (e.target === modelInfoModal) {
+        modelInfoModal.style.display = 'none';
+      }
+    });
+  }
+  
+  // Setup file upload
+  if (uploadZone) {
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('drag-over');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFileUpload(files[0]);
+      }
+    });
+  }
+  
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileUpload(e.target.files[0]);
+      }
+    });
+  }
 
+  // 🔥 IMPROVED: Fullscreen với hỗ trợ mobile tốt hơn
+  if (viewerShell && btnFullscreen) {
+    // Sử dụng touchend cho mobile, click cho desktop
+    btnFullscreen.addEventListener('click', handleFullscreenToggle);
+    btnFullscreen.addEventListener('touchend', (e) => {
+      e.preventDefault(); // Ngăn double-tap zoom trên iOS
+      handleFullscreenToggle();
+    });
+
+    // Lắng nghe tất cả các sự kiện fullscreen change
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    // Thêm orientation change cho mobile
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeRendererToDisplaySize, 100);
+    });
+
+    // Position the fullscreen button (it lives outside the viewer shell now)
+    window.addEventListener('resize', () => {
+      // Resize handling if needed later
+    });
   }
+}
+
+function positionFullscreenButton() {
+  // No longer needed - button stays in shell with CSS positioning
 }
 
 function setupHDRI() {
@@ -199,10 +283,15 @@ loader.load('assets/hdr/lilienstein_4k.hdr', (hdrData) => {
   pmremGenerator.dispose();
 });
 
-// 🔥 NEW: các hàm hỗ trợ fullscreen
+// 🔥 IMPROVED: Fullscreen functions với hỗ trợ mobile tốt hơn
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
 
 function isViewerFullscreen() {
-  return (
+  return !!(
     document.fullscreenElement === viewerShell ||
     document.webkitFullscreenElement === viewerShell ||
     document.mozFullScreenElement === viewerShell ||
@@ -210,30 +299,98 @@ function isViewerFullscreen() {
   );
 }
 
-function handleFullscreenToggle() {
-  if (!viewerShell) return;
+function enterFakeFullscreen() {
+  // Fake fullscreen cho iOS Safari
+  viewerShell.classList.add('fake-fullscreen');
+  btnFullscreen.classList.add('is-fullscreen');
+  document.body.style.overflow = 'hidden';
+  
+  // Scroll to top và ẩn address bar
+  window.scrollTo(0, 1);
+  
+  // Lock orientation nếu được hỗ trợ
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {});
+  }
+  
+  resizeRendererToDisplaySize();
+}
 
-  if (!isViewerFullscreen()) {
-    // Vào fullscreen
-    if (viewerShell.requestFullscreen) {
-      viewerShell.requestFullscreen();
-    } else if (viewerShell.webkitRequestFullscreen) {
-      viewerShell.webkitRequestFullscreen();
-    } else if (viewerShell.mozRequestFullScreen) {
-      viewerShell.mozRequestFullScreen();
-    } else if (viewerShell.msRequestFullscreen) {
-      viewerShell.msRequestFullscreen();
+function exitFakeFullscreen() {
+  viewerShell.classList.remove('fake-fullscreen');
+  btnFullscreen.classList.remove('is-fullscreen');
+  document.body.style.overflow = '';
+  
+  // Unlock orientation
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  }
+  
+  resizeRendererToDisplaySize();
+}
+
+function handleFullscreenToggle() {
+  if (!viewerShell) {
+    console.error('viewerShell không tồn tại');
+    return;
+  }
+
+  // Nếu là iOS Safari, dùng fake fullscreen
+  if (isIOS() && !document.fullscreenEnabled) {
+    if (viewerShell.classList.contains('fake-fullscreen')) {
+      exitFakeFullscreen();
+    } else {
+      enterFakeFullscreen();
     }
-  } else {
-    // Thoát fullscreen
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
+    return;
+  }
+
+  try {
+    if (!isViewerFullscreen()) {
+      // Vào fullscreen - thử tất cả các phương thức
+      const requestFullscreen = 
+        viewerShell.requestFullscreen ||
+        viewerShell.webkitRequestFullscreen ||
+        viewerShell.webkitEnterFullscreen ||
+        viewerShell.mozRequestFullScreen ||
+        viewerShell.msRequestFullscreen;
+
+      if (requestFullscreen) {
+        const promise = requestFullscreen.call(viewerShell);
+        
+        if (promise && promise.catch) {
+          promise.catch(err => {
+            console.log('Fullscreen bị chặn, dùng fake fullscreen:', err);
+            // Fallback sang fake fullscreen nếu bị chặn
+            enterFakeFullscreen();
+          });
+        }
+      } else {
+        console.log('Trình duyệt không hỗ trợ Fullscreen API, dùng fake fullscreen');
+        enterFakeFullscreen();
+      }
+    } else {
+      // Thoát fullscreen
+      const exitFullscreen = 
+        document.exitFullscreen ||
+        document.webkitExitFullscreen ||
+        document.webkitCancelFullScreen ||
+        document.mozCancelFullScreen ||
+        document.msExitFullscreen;
+
+      if (exitFullscreen) {
+        exitFullscreen.call(document).catch(err => {
+          console.error('Lỗi khi thoát fullscreen:', err);
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Lỗi fullscreen:', error);
+    // Fallback sang fake fullscreen
+    if (viewerShell.classList.contains('fake-fullscreen')) {
+      exitFakeFullscreen();
+    } else {
+      enterFakeFullscreen();
     }
   }
 }
@@ -241,14 +398,28 @@ function handleFullscreenToggle() {
 function handleFullscreenChange() {
   if (!btnFullscreen) return;
 
-  if (isViewerFullscreen()) {
+  const isFullscreen = isViewerFullscreen();
+  
+  if (isFullscreen) {
     btnFullscreen.classList.add('is-fullscreen');
+    // Lock orientation to landscape on mobile if supported
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(err => {
+        console.log('Không thể khóa orientation:', err);
+      });
+    }
   } else {
     btnFullscreen.classList.remove('is-fullscreen');
+    // Unlock orientation when exiting fullscreen
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
   }
 
   // Cập nhật lại size/camera khi vào/thoát fullscreen
-  resizeRendererToDisplaySize();
+  setTimeout(() => {
+    resizeRendererToDisplaySize();
+  }, 100);
 }
 
 function loadModel(url) {
@@ -432,6 +603,160 @@ function updatePolyCount(model) {
 
 function showLoading(show) {
   loadingOverlay.style.display = show ? 'flex' : 'none';
+}
+
+// ========== NEW FEATURES ==========
+
+function switchEnvironment(envType) {
+  // Switch between different lighting setups
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+
+  let hdrFile = 'assets/hdr/lilienstein_4k.hdr'; // default
+  
+  if (envType === 'studio') {
+    hdrFile = 'assets/hdr/studio_small_08_1k.hdr';
+  } else if (envType === 'outdoor') {
+    hdrFile = 'assets/hdr/lilienstein_4k.hdr';
+  } else if (envType === 'neutral') {
+    // Neutral environment - simple color
+    const color = new THREE.Color(0xffffff);
+    scene.background = color;
+    scene.environment = null;
+    return;
+  }
+
+  const loader = new HDRLoader();
+  loader.load(hdrFile, (hdrData) => {
+    const texture = new THREE.DataTexture(
+      hdrData.data,
+      hdrData.width,
+      hdrData.height,
+      THREE.RGBAFormat,
+      THREE.FloatType
+    );
+    texture.needsUpdate = true;
+
+    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+    scene.environment = envMap;
+    scene.background = new THREE.Color(0xf5f7fb);
+    texture.dispose();
+  });
+}
+
+function captureScreenshot() {
+  // Capture current viewport as image
+  if (!renderer) return;
+  
+  renderer.render(scene, camera);
+  const canvas = renderer.domElement;
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    link.href = url;
+    link.download = `screenshot-${timestamp}.png`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+function showModelInfo() {
+  if (!currentModel) {
+    alert('Chưa tải model nào');
+    return;
+  }
+
+  const box = new THREE.Box3().setFromObject(currentModel);
+  const size = box.getSize(new THREE.Vector3());
+  
+  let polygons = 0;
+  let materials = new Set();
+  
+  currentModel.traverse((child) => {
+    if (child.isMesh) {
+      if (child.geometry.index) {
+        polygons += child.geometry.index.count / 3;
+      } else if (child.geometry.attributes && child.geometry.attributes.position) {
+        polygons += child.geometry.attributes.position.count / 3;
+      }
+      
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => materials.add(m.name || 'Material'));
+        } else {
+          materials.add(child.material.name || 'Material');
+        }
+      }
+    }
+  });
+
+  document.getElementById('infoFileName').textContent = currentModelFileName;
+  document.getElementById('infoFileSize').textContent = '—';
+  document.getElementById('infoPolygons').textContent = Math.round(polygons).toLocaleString('vi-VN');
+  document.getElementById('infoMaterials').textContent = materials.size || '—';
+  document.getElementById('infoDimensions').textContent = 
+    `${size.x.toFixed(2)} × ${size.y.toFixed(2)} × ${size.z.toFixed(2)}`;
+
+  modelInfoModal.style.display = 'flex';
+}
+
+function handleFileUpload(file) {
+  if (!file.name.endsWith('.glb') && !file.name.endsWith('.gltf')) {
+    alert('Chỉ hỗ trợ file .glb hoặc .gltf');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const arrayBuffer = e.target.result;
+    loadModelFromArrayBuffer(arrayBuffer, file.name);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function loadModelFromArrayBuffer(arrayBuffer, fileName) {
+  showLoading(true);
+  clearCurrentModel();
+  currentModelFileName = fileName;
+
+  const loader = new GLTFLoader();
+  const blob = new Blob([arrayBuffer], { type: 'model/gltf-binary' });
+  const url = URL.createObjectURL(blob);
+
+  loader.load(
+    url,
+    (gltf) => {
+      currentModel = gltf.scene;
+
+      currentModel.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            child.material.side = THREE.DoubleSide;
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+
+      scene.add(currentModel);
+
+      normalizeAndFrameModel(currentModel);
+      buildPartsList(currentModel);
+      updatePolyCount(currentModel);
+
+      showLoading(false);
+      URL.revokeObjectURL(url);
+    },
+    undefined,
+    (error) => {
+      console.error('Error loading custom model', error);
+      showLoading(false);
+      alert('Không tải được model. Kiểm tra file .glb/.gltf');
+      URL.revokeObjectURL(url);
+    }
+  );
 }
 
 function animate() {

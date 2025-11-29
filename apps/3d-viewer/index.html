@@ -89,17 +89,18 @@
               </div>
             </header>
 
-            <div class="viewer-canvas-shell" id="viewerCanvasShell">
+           <div class="viewer-canvas-shell" id="viewerCanvasShell">
               <canvas id="viewer"></canvas>
               <div class="viewer-loading" id="loadingOverlay">
                 <div class="viewer-spinner"></div>
                 <div class="viewer-loading-text">Đang tải model 3D...</div>
               </div>
-              <button class="btn-fullscreen" id="btnFullscreen" title="Toàn màn hình">
-                <svg class="icon-expand" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <!-- Fullscreen button inside shell so it moves with the viewer -->
+              <button class="btn-fullscreen" id="btnFullscreen" title="Toàn màn hình" type="button">
+                <svg class="icon-expand" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                 </svg>
-                <svg class="icon-compress" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="icon-compress" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
                 </svg>
               </button>
@@ -161,6 +162,71 @@
                 <span class="viewer-meta-value" id="centerLabel">—</span>
               </div>
             </footer>
+
+            <!-- Additional controls row -->
+            <div class="viewer-controls-row">
+              <div class="viewer-block">
+                <div class="viewer-block-label viewer-block-label-inline">
+                  <span>Môi trường</span>
+                  <span class="viewer-block-hint">Lighting preset</span>
+                </div>
+                <div class="viewer-select-shell">
+                  <select id="environmentSelect">
+                    <option value="studio">Studio</option>
+                    <option value="outdoor">Ngoài trời</option>
+                    <option value="neutral">Trung lập</option>
+                  </select>
+                </div>
+
+                <div class="viewer-block-label viewer-block-label-inline" style="margin-top: 0.6rem;">
+                  <span>Công cụ</span>
+                </div>
+                <div class="viewer-toolbar">
+                  <button id="btnScreenshot" class="btn-chip" title="Chụp ảnh màn hình">📸 Chụp ảnh</button>
+                  <button id="btnModelInfo" class="btn-chip" title="Thông tin model">ℹ️ Thông tin</button>
+                </div>
+              </div>
+
+              <div class="viewer-block">
+                <div class="viewer-block-label">Tải file tùy chỉnh</div>
+                <div class="viewer-upload-zone" id="uploadZone">
+                  <input type="file" id="fileInput" accept=".glb,.gltf" style="display:none;">
+                  <div class="upload-text">👉 Kéo thả file .glb/.gltf hoặc bấm để chọn</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Model Info Modal -->
+            <div id="modelInfoModal" class="modal" style="display:none;">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3>Thông tin Model</h3>
+                  <button class="modal-close" id="closeModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                  <div class="info-row">
+                    <span class="info-label">Tên file:</span>
+                    <span class="info-value" id="infoFileName">—</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Kích thước:</span>
+                    <span class="info-value" id="infoFileSize">—</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Polygons:</span>
+                    <span class="info-value" id="infoPolygons">—</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Materials:</span>
+                    <span class="info-value" id="infoMaterials">—</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Kích thước model:</span>
+                    <span class="info-value" id="infoDimensions">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       </div>
