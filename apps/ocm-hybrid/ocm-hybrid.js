@@ -3,9 +3,9 @@
    ========================================================= */
 const TOKEN_KEY     = 'CP_AUTH_TOKEN';                // SSO cphaco.app
 const OCM_API_BASE  = 'https://cphaco.onrender.com'; // TODO: sửa
-const MAPTILER_KEY  = '8pEn3Eq4R9zBXqJNIOXF';       // TODO: sửa
+const MAPTILER_KEY  = 'x8p20fOYXXCBA2iHHKMw';       // TODO: sửa
 const DEFAULT_CENTER= [106.6521,11.1836];
-const DEFAULT_ZOOM  = 18;
+const DEFAULT_ZOOM  = 17;
 
 /* =========================================================
    JWT HELPER – giống signin.js
@@ -146,7 +146,7 @@ const styles = {
 const map = new maplibregl.Map({
   container:'map', style:styles.streets,
   center:DEFAULT_CENTER, zoom:DEFAULT_ZOOM,
-  maxZoom:25, minZoom:4
+  maxZoom:22, minZoom:17
 });
 window.map = map;
 
@@ -371,51 +371,100 @@ async function loadPlots(){
 async function loadOverlays(){
   try{
     const images = await apiGet('/ocm/overlays');
+
+    // Xoá source/layer cũ
     overlayLayerIds.forEach(id=>{
-      if(map.getLayer(id)) map.removeLayer(id);
+      if (map.getLayer(id)) map.removeLayer(id);
       const sid = id.replace('layer','img');
-      if(map.getSource(sid)) map.removeSource(sid);
+      if (map.getSource(sid)) map.removeSource(sid);
     });
     overlayLayerIds = [];
 
     overlayImages = images || [];
     const beforeId = map.getLayer('plots-circle') ? 'plots-circle' : undefined;
 
-    overlayImages.forEach((img,i)=>{
-      const sid = `img-${i}`, lid = `layer-${i}`;
-      if (!map.getSource(sid)) {
-        map.addSource(sid, {
-          type:'image',
-          url: img.url,
-          coordinates: [
-            img.nw,
-            [img.se[0], img.nw[1]],
-            img.se,
-            [img.nw[0], img.se[1]]
-          ]
-        });
+    overlayImages.forEach((img, i) => {
+      const sid = `img-${i}`;
+      const lid = `layer-${i}`;
+      const url = String(img.url || '').trim();
+
+      // Dùng chung cho fitBounds
+      const hasBounds = Array.isArray(img.nw) && Array.isArray(img.se);
+      // Phân loại: URL tiles hay URL ảnh đơn
+      const isTiles = /\{z\}|\{x\}|\{y\}/i.test(url);
+
+      if (isTiles) {
+        // ====== OVERLAY DẠNG TILES (MapTiler / R2) ======
+        if (!map.getSource(sid)) {
+          map.addSource(sid, {
+            type: 'raster',
+            tiles: [url],                // ví dụ: https://pub-xxx.r2.dev/Tiles/B3.3.1/{z}/{x}/{y}.png
+            tileSize: 256,
+            minzoom: img.minZoom ?? 18,  // nếu sau này bạn thêm cột minZoom/maxZoom thì backend trả ra là dùng luôn
+            maxzoom: img.maxZoom ?? 23
+          });
+        }
+        if (!map.getLayer(lid)) {
+          map.addLayer({
+            id: lid,
+            type: 'raster',
+            source: sid,
+            paint: { 'raster-opacity': 1 }
+          }, beforeId);
+        }
+      } else {
+        // ====== OVERLAY DẠNG ẢNH ĐƠN (cách cũ) ======
+        if (!map.getSource(sid) && hasBounds) {
+          map.addSource(sid, {
+            type:'image',
+            url: url,
+            coordinates: [
+              img.nw,                                  // [lng, lat] góc trên trái
+              [img.se[0], img.nw[1]],                  // trên phải
+              img.se,                                  // dưới phải
+              [img.nw[0], img.se[1]]                   // dưới trái
+            ]
+          });
+        }
+        if (!map.getLayer(lid) && map.getSource(sid)) {
+          map.addLayer(
+            { id: lid, type:'raster', source:sid, paint:{ 'raster-opacity': 1 } },
+            beforeId
+          );
+        }
       }
-      if (!map.getLayer(lid)) {
-        map.addLayer({ id: lid, type:'raster', source:sid, paint:{'raster-opacity':1} }, beforeId);
-      }
+
       overlayLayerIds.push(lid);
     });
 
+    // Bật / tắt theo chip "Ảnh Overlay"
     const show = document.getElementById('layer-overlays')?.classList.contains('active') ?? true;
     overlayLayerIds.forEach(id=>{
-      if(map.getLayer(id)) map.setLayoutProperty(id,'visibility', show ? 'visible' : 'none');
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, 'visibility', show ? 'visible' : 'none');
+      }
     });
 
-    if(overlayImages.length){
+    // fitBounds toàn bộ overlay (dùng NW/SE như cũ)
+    if (overlayImages.length) {
       const b = new maplibregl.LngLatBounds();
-      overlayImages.forEach(i=>{ b.extend(i.nw); b.extend(i.se); });
-      map.fitBounds(b, { padding:20 });
+      overlayImages.forEach(i => {
+        if (Array.isArray(i.nw) && Array.isArray(i.se)) {
+          b.extend(i.nw);
+          b.extend(i.se);
+        }
+      });
+      if (!b.isEmpty()) {
+        map.fitBounds(b, { padding: 20 });
+      }
     }
+
     showToast(`🖼️ ${overlayImages.length} overlay`);
   }catch(e){
     console.error('loadOverlays', e);
   }
 }
+
 
 /* =========================================================
    MAP LAYERS: plots
