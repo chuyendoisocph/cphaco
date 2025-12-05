@@ -6,7 +6,11 @@ const OCM_API_BASE  = 'https://cphaco.onrender.com'; // TODO: sửa
 const MAPTILER_KEY  = 'x8p20fOYXXCBA2iHHKMw';       // TODO: sửa
 const DEFAULT_CENTER= [106.6521,11.1836];
 const DEFAULT_ZOOM  = 17;
-
+// Đặt ở đầu file ocm-hybrid.js
+if (typeof pmtiles !== 'undefined') {
+  let protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+}
 /* =========================================================
    JWT HELPER – giống signin.js
    ========================================================= */
@@ -146,7 +150,7 @@ const styles = {
 const map = new maplibregl.Map({
   container:'map', style:styles.streets,
   center:DEFAULT_CENTER, zoom:DEFAULT_ZOOM,
-  maxZoom:22, minZoom:17
+  maxZoom:25, minZoom:15
 });
 window.map = map;
 
@@ -370,9 +374,10 @@ async function loadPlots(){
 
 async function loadOverlays(){
   try{
-    const images = await apiGet('/ocm/overlays');
-
-    // Xoá source/layer cũ
+    // Gọi API lấy danh sách (bạn cần đảm bảo backend trả về dữ liệu giống Google Sheet)
+    const list = await apiGet('/ocm/overlays'); 
+    
+    // Xóa layer/source cũ để tránh trùng lặp khi reload
     overlayLayerIds.forEach(id=>{
       if (map.getLayer(id)) map.removeLayer(id);
       const sid = id.replace('layer','img');
@@ -380,88 +385,83 @@ async function loadOverlays(){
     });
     overlayLayerIds = [];
 
-    overlayImages = images || [];
+    const overlayList = list || [];
     const beforeId = map.getLayer('plots-circle') ? 'plots-circle' : undefined;
+    const allBounds = new maplibregl.LngLatBounds();
 
-    overlayImages.forEach((img, i) => {
+    overlayList.forEach((item, i) => {
+      // 1. Map dữ liệu từ các tên cột trong Google Sheet (Link, NW_Lng...) hoặc API cũ (url, nw...)
+      let url = String(item.Link || item.url || '').trim();
+      
+      // Lấy tọa độ để fitBounds (hỗ trợ cả kiểu Google Sheet rời rạc và kiểu API mảng cũ)
+      const nwLng = Number(item.NW_Lng ?? item.nw?.[0]);
+      const nwLat = Number(item.NW_Lat ?? item.nw?.[1]);
+      const seLng = Number(item.SE_Lng ?? item.se?.[0]);
+      const seLat = Number(item.SE_Lat ?? item.se?.[1]);
+
+      // 2. Fix domain tự động (nếu lỡ trong sheet vẫn để r2.dev)
+      if (url.includes('.r2.dev')) {
+        url = url.replace(/https:\/\/.*\.r2\.dev/, 'https://tiles.cphaco.id.vn');
+      }
+
+      if (!url) return;
+
       const sid = `img-${i}`;
       const lid = `layer-${i}`;
-      const url = String(img.url || '').trim();
-
-      // Dùng chung cho fitBounds
-      const hasBounds = Array.isArray(img.nw) && Array.isArray(img.se);
-      // Phân loại: URL tiles hay URL ảnh đơn
-      const isTiles = /\{z\}|\{x\}|\{y\}/i.test(url);
-
-      if (isTiles) {
-        // ====== OVERLAY DẠNG TILES (MapTiler / R2) ======
-        if (!map.getSource(sid)) {
-          map.addSource(sid, {
-            type: 'raster',
-            tiles: [url],                // ví dụ: https://pub-xxx.r2.dev/Tiles/B3.3.1/{z}/{x}/{y}.png
-            tileSize: 256,
-            minzoom: img.minZoom ?? 18,  // nếu sau này bạn thêm cột minZoom/maxZoom thì backend trả ra là dùng luôn
-            maxzoom: img.maxZoom ?? 23
-          });
-        }
-        if (!map.getLayer(lid)) {
-          map.addLayer({
-            id: lid,
-            type: 'raster',
-            source: sid,
-            paint: { 'raster-opacity': 1 }
-          }, beforeId);
-        }
-      } else {
-        // ====== OVERLAY DẠNG ẢNH ĐƠN (cách cũ) ======
-        if (!map.getSource(sid) && hasBounds) {
-          map.addSource(sid, {
-            type:'image',
-            url: url,
-            coordinates: [
-              img.nw,                                  // [lng, lat] góc trên trái
-              [img.se[0], img.nw[1]],                  // trên phải
-              img.se,                                  // dưới phải
-              [img.nw[0], img.se[1]]                   // dưới trái
-            ]
-          });
-        }
-        if (!map.getLayer(lid) && map.getSource(sid)) {
-          map.addLayer(
-            { id: lid, type:'raster', source:sid, paint:{ 'raster-opacity': 1 } },
-            beforeId
-          );
-        }
+      
+      // 3. Xử lý PMTiles (Ưu tiên)
+      if (url.endsWith('.pmtiles')) {
+         if (!map.getSource(sid)) {
+           map.addSource(sid, {
+             type: 'raster',
+             url: `pmtiles://${url}`, // Cú pháp bắt buộc cho pmtiles
+             tileSize: 256
+           });
+         }
+         if (!map.getLayer(lid)) {
+           map.addLayer({
+             id: lid,
+             type: 'raster',
+             source: sid,
+             paint: { 'raster-opacity': 1 }
+           }, beforeId);
+         }
+      } 
+      // 4. Xử lý Link ảnh thường (Dự phòng cho các map cũ chưa convert)
+      else if (/\{z\}/.test(url)) { // Dạng XYZ
+         if (!map.getSource(sid)) map.addSource(sid, { type:'raster', tiles:[url], tileSize:256 });
+         if (!map.getLayer(lid))  map.addLayer({ id:lid, type:'raster', source:sid }, beforeId);
+      }
+      else if (nwLng && nwLat && seLng && seLat) { // Dạng ảnh đơn (Image Overlay)
+         if (!map.getSource(sid)) {
+            map.addSource(sid, {
+              type: 'image',
+              url: url,
+              coordinates: [[nwLng, nwLat], [seLng, nwLat], [seLng, seLat], [nwLng, seLat]]
+            });
+         }
+         if (!map.getLayer(lid)) map.addLayer({ id:lid, type:'raster', source:sid }, beforeId);
       }
 
+      // Lưu layer ID để quản lý bật/tắt
       overlayLayerIds.push(lid);
-    });
 
-    // Bật / tắt theo chip "Ảnh Overlay"
-    const show = document.getElementById('layer-overlays')?.classList.contains('active') ?? true;
-    overlayLayerIds.forEach(id=>{
-      if (map.getLayer(id)) {
-        map.setLayoutProperty(id, 'visibility', show ? 'visible' : 'none');
+      // Gom bounds để zoom map vừa khít tất cả overlay
+      if (nwLng && nwLat && seLng && seLat) {
+        allBounds.extend([nwLng, nwLat]);
+        allBounds.extend([seLng, seLat]);
       }
     });
 
-    // fitBounds toàn bộ overlay (dùng NW/SE như cũ)
-    if (overlayImages.length) {
-      const b = new maplibregl.LngLatBounds();
-      overlayImages.forEach(i => {
-        if (Array.isArray(i.nw) && Array.isArray(i.se)) {
-          b.extend(i.nw);
-          b.extend(i.se);
-        }
-      });
-      if (!b.isEmpty()) {
-        map.fitBounds(b, { padding: 20 });
-      }
+    // Zoom bản đồ bao quát hết các overlay vừa load
+    if (!allBounds.isEmpty()) {
+      map.fitBounds(allBounds, { padding: 20 });
     }
 
-    showToast(`🖼️ ${overlayImages.length} overlay`);
-  }catch(e){
-    console.error('loadOverlays', e);
+    showToast(`🗺️ Đã tải ${overlayLayerIds.length} bản đồ PMTiles`);
+
+  } catch(e){ 
+    console.error('loadOverlays error', e); 
   }
 }
 
