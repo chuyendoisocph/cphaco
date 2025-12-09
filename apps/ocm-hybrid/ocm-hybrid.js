@@ -150,7 +150,7 @@ const styles = {
 const map = new maplibregl.Map({
   container:'map', style:styles.streets,
   center:DEFAULT_CENTER, zoom:DEFAULT_ZOOM,
-  maxZoom:25, minZoom:15
+  maxZoom:25, minZoom:4
 });
 window.map = map;
 
