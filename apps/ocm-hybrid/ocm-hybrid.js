@@ -150,7 +150,7 @@ const styles = {
 const map = new maplibregl.Map({
   container:'map', style:styles.streets,
   center:DEFAULT_CENTER, zoom:DEFAULT_ZOOM,
-  maxZoom:25, minZoom:4
+  maxZoom:22, minZoom:4
 });
 window.map = map;
 
@@ -179,6 +179,20 @@ const totalCount     = $('totalCount');
 const availableCount = $('availableCount');
 const soldCount      = $('soldCount');
 const reservedCount  = $('reservedCount');
+
+// Zoom display element
+const zoomLevel = $('zoomLevel');
+function updateZoomDisplay(){
+  try{
+    const z = map.getZoom();
+    if (zoomLevel) zoomLevel.textContent = Number(z).toFixed(1);
+  }catch(e){ /* ignore when map not ready */ }
+}
+map.on('move', updateZoomDisplay);
+map.on('zoom', updateZoomDisplay);
+map.on('load', updateZoomDisplay);
+// initial value
+updateZoomDisplay();
 
 const STATUS_COLORS = {
   'Trống': '#0EA5E9',
