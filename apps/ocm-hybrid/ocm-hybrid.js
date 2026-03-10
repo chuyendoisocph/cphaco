@@ -65,8 +65,19 @@ let currentUser = null;
 function ensureUserOrRedirect(){
   const raw = localStorage.getItem(TOKEN_KEY);
   if (!raw) {
-    window.location.href = '/signin.html?next=' + encodeURIComponent(window.location.pathname.replace(/^\//,''));
-    return null;
+    // Temporarily bypass login - return mock user
+    const mockUser = {
+      fullName: 'Người dùng thử nghiệm',
+      name: 'Test User',
+      email: 'test@example.com',
+      phone: '',
+      branch: 'Test Branch',
+      role: 'User',
+      avatar: null
+    };
+    currentUser = mockUser;
+    populateProfileFromPayload(mockUser);
+    return mockUser;
   }
   try{
     const payload = parseJWT(raw);
@@ -75,8 +86,19 @@ function ensureUserOrRedirect(){
     return payload;
   }catch(e){
     console.warn('[OCM] Invalid token', e);
-    window.location.href = '/signin.html?next=' + encodeURIComponent(window.location.pathname.replace(/^\//,''));
-    return null;
+    // Temporarily bypass login on invalid token too
+    const mockUser = {
+      fullName: 'Người dùng thử nghiệm',
+      name: 'Test User',
+      email: 'test@example.com',
+      phone: '',
+      branch: 'Test Branch',
+      role: 'User',
+      avatar: null
+    };
+    currentUser = mockUser;
+    populateProfileFromPayload(mockUser);
+    return mockUser;
   }
 }
 function getLoginDisplayName(){
@@ -117,7 +139,8 @@ function initials(s){
 }
 function logout(){
   try{ localStorage.removeItem(TOKEN_KEY); }catch{}
-  window.location.href = '/signin.html';
+  // Temporarily disabled redirect - just reload to mock user
+  window.location.reload();
 }
 
 /* =========================================================
