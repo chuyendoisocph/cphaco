@@ -99,7 +99,7 @@ const APPS_DATABASE = {
         id: 'MAP001',
         name: 'Bản đồ số',
         description: 'Bản đồ số hoa viên OCM',
-        url: 'apps/ocm-hybrid/index.html',
+        url: 'https://bandoso.cphaco.app',
         icon: '🗺️',
         color: 'linear-gradient(135deg, #f093fb, #f5576c)',
         status: 'active'
